@@ -12,7 +12,6 @@ import mongoose from 'mongoose';
 import app from './app';
 import config from './app/config';
 import seedingAdmin from './app/utils/seeding';
-import { seedingLedger } from './app/utils';
 
 let server: Server;
 
@@ -38,7 +37,6 @@ async function bootstrap() {
     await mongoose.connect(config.db_url as string);
     console.log('🛢 Database connected successfully');
     await seedingAdmin();
-    await seedingLedger();
     server = app.listen(config.port, () => {
       console.log(`🚀 Application is running on port ${config.port}`);
     });

@@ -4,7 +4,6 @@ import asyncHandler from './asyncHandler';
 import { deleteFile } from './deleteFile';
 import globalErrorHandler from './globalErrorHandler';
 import notFound from './notFound';
-import seedingLedger from './seedingLedger';
 import sendContactUsEmail from './sendContactUsEmail';
 import sendOtpEmail from './sendOtpEmail';
 
@@ -26,5 +25,4 @@ export {
   sendOtpEmail,
   deleteFile,
   sendContactUsEmail,
-  seedingLedger,
 };
