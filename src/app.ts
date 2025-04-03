@@ -1,8 +1,8 @@
 /*
- * Title: Creativecventur
- * Description: A donate application backend system using express
+ * Title: Steady Hands
+ * Description: A tatto sales backend system using express
  * Author: Md Naim Uddin
- * Date: 12/03/2025
+ * Date: 25/03/2025
  *
  */
 
@@ -19,7 +19,7 @@ const app: Application = express();
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:3001'],
+    origin: ['http://localhost:3000'],
   })
 );
 app.use(cookieParser());

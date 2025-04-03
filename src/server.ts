@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 /*
- * Title: Creativecventur
- * Description: A donate application backend system using express
+ * Title: Steady Hands
+ * Description: A tatto sales backend system using express
  * Author: Md Naim Uddin
- * Date: 12/03/2025
+ * Date: 25/03/2025
  *
  */
 
