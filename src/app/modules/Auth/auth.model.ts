@@ -43,13 +43,9 @@ const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
       type: String,
       default: null,
     },
-    verificationCode: {
-      type: String,
-      default: null,
-    },
-    verificationExpiry: {
-      type: Date,
-      default: null,
+    isProfile: {
+      type: Boolean,
+      default: false,
     },
     isVerified: {
       type: Boolean,

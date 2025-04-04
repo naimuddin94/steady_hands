@@ -78,6 +78,11 @@ const clientSchema = new Schema<IClient>(
       ref: 'ClientPreferences',
       required: true,
     },
+    auth: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Auth',
+      required: true,
+    },
   },
   {
     timestamps: true,

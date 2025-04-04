@@ -10,8 +10,7 @@ export interface IAuth extends Document {
   role: TRole;
   isSocialLogin: boolean;
   refreshToken?: string | null;
-  verificationCode?: string | null;
-  verificationExpiry?: Date | null;
+  isProfile: boolean;
   isVerified: boolean;
   isActive: boolean;
 }

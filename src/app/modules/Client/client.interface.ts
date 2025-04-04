@@ -22,4 +22,5 @@ export interface IClient extends Document {
   language: string;
   dateFormat: DateFormat;
   preferences: mongoose.Types.ObjectId;
+  auth: mongoose.Types.ObjectId;
 }

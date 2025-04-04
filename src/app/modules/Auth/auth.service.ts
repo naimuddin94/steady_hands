@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { generateOtp } from '../../lib';
 import sendOtpSms from '../../utils/sendOtpSms';
@@ -6,6 +7,10 @@ import config from '../../config';
 import { AppError } from '../../utils';
 import status from 'http-status';
 import Auth from './auth.model';
+import { TProfilePayload } from './auth.validation';
+import { ROLE } from './auth.constant';
+import Client from '../Client/client.model';
+import ClientPreferences from '../ClientPreferences/clientPreferences.model';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -75,8 +80,20 @@ const saveAuthIntoDB = async (token: string, otp: number) => {
   return { accessToken, refreshToken };
 };
 
+const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
+  if (payload.role === ROLE.CLIENT) {
+    const result = await Client.create({ ...payload, authId: user._id });
+    await ClientPreferences.create({
+      notificationPreferences: payload.notificationPreferences,
+    });
+
+    return result;
+  }
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
   signupOtpSendAgin,
+  saveProfileIntoDB,
 };
