@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
-import { IAuth } from './auth.interface';
+import { IAuth, IAuthModel } from './auth.interface';
 import { ROLE } from './auth.constant';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../../config';
 
-const authSchema = new mongoose.Schema<IAuth>(
+const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
   {
     email: {
       type: String,
@@ -107,6 +107,6 @@ authSchema.methods.generateRefreshToken = function () {
   );
 };
 
-const Auth = mongoose.model('Auth', authSchema);
+const Auth = mongoose.model<IAuth, IAuthModel>('Auth', authSchema);
 
 export default Auth;

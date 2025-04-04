@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { TRole } from './auth.constant';
 
 export interface IAuth extends Document {
@@ -14,3 +14,12 @@ export interface IAuth extends Document {
   isVerified: boolean;
   isActive: boolean;
 }
+
+export interface IAuthMethods {
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface IAuthModel
+  extends Model<IAuth, Record<string, never>, IAuthMethods> {}
