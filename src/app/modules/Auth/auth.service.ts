@@ -55,6 +55,7 @@ const saveAuthIntoDB = async (token: string, otp: number) => {
   }
 
   const result = await Auth.create({
+    fullName: decoded.fullName,
     phoneNumber: decoded.phoneNumber,
     email: decoded.email,
     password: decoded.password,

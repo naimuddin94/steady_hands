@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { locationSchema } from '../Location/location.model';
 import {
   ArtistType,
@@ -10,7 +10,6 @@ import {
 } from './client.constant';
 
 export interface IClient extends Document {
-  fullName: string;
   image?: string;
   location: typeof locationSchema;
   radius: number;
@@ -22,4 +21,5 @@ export interface IClient extends Document {
   preferredArtistType: ArtistType;
   language: string;
   dateFormat: DateFormat;
+  preferences: mongoose.Types.ObjectId;
 }

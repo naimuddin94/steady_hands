@@ -3,6 +3,7 @@ import { TRole } from './auth.constant';
 
 export interface IAuth extends Document {
   email: string;
+  fullName?: string;
   phoneNumber: string;
   password: string;
   fcmToken: string | null;

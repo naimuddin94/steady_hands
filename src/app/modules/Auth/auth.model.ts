@@ -12,6 +12,10 @@ const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
       required: true,
       unique: true,
     },
+    fullName: {
+      type: String,
+      required: false,
+    },
     phoneNumber: {
       type: String,
       required: false,
