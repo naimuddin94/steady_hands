@@ -204,6 +204,10 @@ const profileSchema = z.object({
         required_error: 'Role is required',
         invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
       }),
+      type: z.enum(['CLIENT', 'ARTIST', 'BUSINESS'], {
+        required_error: 'Role is required',
+        invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
+      }).optional(),
       location: z
         .object({
           longitude: z.number().min(-180).max(180),
