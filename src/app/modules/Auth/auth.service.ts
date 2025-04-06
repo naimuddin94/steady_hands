@@ -11,6 +11,8 @@ import { TProfilePayload } from './auth.validation';
 import { ROLE } from './auth.constant';
 import Client from '../Client/client.model';
 import ClientPreferences from '../ClientPreferences/clientPreferences.model';
+import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -80,14 +82,80 @@ const saveAuthIntoDB = async (token: string, otp: number) => {
   return { accessToken, refreshToken };
 };
 
-const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
-  if (payload.role === ROLE.CLIENT) {
-    const result = await Client.create({ ...payload, authId: user._id });
-    await ClientPreferences.create({
-      notificationPreferences: payload.notificationPreferences,
-    });
+const signinIntoDB = async (payload: { email: string; password: string }) => {
+  const user = await Auth.findOne({ email: payload.email }).select('+password');
 
-    return result;
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'User not exists!');
+  }
+
+  const isPasswordCorrect = await bcrypt.compare(
+    payload.password,
+    user.password
+  );
+
+  if (!isPasswordCorrect) {
+    throw new AppError(status.UNAUTHORIZED, 'Invalide credentials');
+  }
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  return {
+    _id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    accessToken,
+    refreshToken,
+  };
+};
+
+const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    if (payload.role === ROLE.CLIENT) {
+      // Manually generate _id for the client so it can be used in both documents
+      const clientId = new mongoose.Types.ObjectId();
+      const preferencesId = new mongoose.Types.ObjectId();
+
+      // Step 1: Create Client
+      const clientPayload = {
+        ...payload,
+        _id: clientId,
+        auth: user._id,
+        preferences: preferencesId,
+      };
+
+      const [client] = await Client.create([clientPayload], { session });
+
+      // Step 2: Create Preferences
+      const [preferences] = await ClientPreferences.create(
+        [
+          {
+            _id: preferencesId,
+            clientId: clientId,
+            notificationPreferences: payload.notificationPreferences,
+          },
+        ],
+        { session }
+      );
+
+      // Step 3: Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      return client;
+    }
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error saving client profile:', error);
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      'Failed to create client profile. Please try again.'
+    );
   }
 };
 
@@ -96,4 +164,5 @@ export const AuthService = {
   saveAuthIntoDB,
   signupOtpSendAgin,
   saveProfileIntoDB,
+  signinIntoDB,
 };

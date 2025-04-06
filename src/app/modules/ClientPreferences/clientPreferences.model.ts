@@ -31,7 +31,7 @@ const clientPreferencesSchema = new Schema(
     lastMinuteBookings: { type: Boolean, default: true },
     newGuestArtists: { type: Boolean, default: true },
     notificationPreferences: {
-      type: String,
+      type: [String],
       enum: ['app', 'email', 'sms'],
       default: ['app'],
     },

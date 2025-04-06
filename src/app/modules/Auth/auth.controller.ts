@@ -48,9 +48,18 @@ const createProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const signin = asyncHandler(async (req, res) => {
+  const result = await AuthService.signinIntoDB(req.body);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Signin successfully'));
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
   signupOtpSendAgin,
   createProfile,
+  signin,
 };

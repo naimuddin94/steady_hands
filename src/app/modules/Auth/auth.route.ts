@@ -6,11 +6,15 @@ import { AuthController } from './auth.controller';
 const router = Router();
 
 router
-  .route('/')
+  .route('/signup')
   .post(
     validateRequest(AuthValidation.createSchema),
     AuthController.createAuth
   );
+
+router
+  .route('/signin')
+  .post(validateRequest(AuthValidation.signinSchema), AuthController.signin);
 
 router.route('/verify-signup-otp').post(AuthController.saveAuthData);
 

@@ -89,7 +89,7 @@ authSchema.methods.generateAccessToken = function () {
     },
     config.jwt_access_secret!,
     {
-      expiresIn: config.jwt_access_expires_in,
+      expiresIn: config.jwt_access_expires_in as any,
     }
   );
 };
@@ -102,7 +102,7 @@ authSchema.methods.generateRefreshToken = function () {
     },
     config.jwt_refresh_secret!,
     {
-      expiresIn: config.jwt_refresh_expires_in,
+      expiresIn: config.jwt_refresh_expires_in as any,
     }
   );
 };
