@@ -204,10 +204,6 @@ const profileSchema = z.object({
         required_error: 'Role is required',
         invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
       }),
-      type: z.enum(['CLIENT', 'ARTIST', 'BUSINESS'], {
-        required_error: 'Role is required',
-        invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
-      }).optional(),
       location: z
         .object({
           longitude: z.number().min(-180).max(180),
@@ -221,17 +217,7 @@ const profileSchema = z.object({
 
       favoriteTattoos: z.array(zodEnumFromObject(favoriteTattoos)).optional(),
 
-      favoritePiercing: z
-        .array(zodEnumFromObject(favoritePiercings))
-        .optional(),
-
-      homeView: zodEnumFromObject(homeViews).optional(),
-
       preferredArtistType: zodEnumFromObject(artistTypes).optional(),
-
-      language: z.string().optional(),
-
-      dateFormat: zodEnumFromObject(dateFormats).optional(),
 
       country: z.string().optional(),
 
@@ -239,6 +225,9 @@ const profileSchema = z.object({
         .union([z.literal('app'), z.literal('email'), z.literal('sms')])
         .array()
         .optional(),
+
+      // for artist role access
+  
     })
     .strict(),
 });

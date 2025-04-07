@@ -82,6 +82,7 @@ const clientSchema = new Schema<IClient>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Auth',
       required: true,
+      unique: true,
     },
   },
   {

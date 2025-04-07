@@ -111,18 +111,41 @@ const signinIntoDB = async (payload: { email: string; password: string }) => {
 };
 
 const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
+  const {
+    role,
+    favoriteTattoos,
+    location,
+    radius,
+    lookingFor,
+    notificationPreferences,
+  } = payload;
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    if (payload.role === ROLE.CLIENT) {
+    if (role === ROLE.CLIENT) {
+      const isExistClient = await Client.findOne({ auth: user._id });
+
+      if (isExistClient) {
+        throw new AppError(
+          status.BAD_REQUEST,
+          'Client data already saved in database'
+        );
+      }
+
       // Manually generate _id for the client so it can be used in both documents
       const clientId = new mongoose.Types.ObjectId();
       const preferencesId = new mongoose.Types.ObjectId();
 
       // Step 1: Create Client
       const clientPayload = {
-        ...payload,
+        role,
+        favoriteTattoos,
+        location,
+        radius,
+        lookingFor,
+        notificationPreferences,
         _id: clientId,
         auth: user._id,
         preferences: preferencesId,
@@ -151,7 +174,11 @@ const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Error saving client profile:', error);
+
+    if (error instanceof AppError) {
+      throw error;
+    }
+
     throw new AppError(
       status.INTERNAL_SERVER_ERROR,
       'Failed to create client profile. Please try again.'
