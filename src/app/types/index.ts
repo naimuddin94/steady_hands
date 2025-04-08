@@ -9,3 +9,9 @@ export interface IMeta {
   total: number;
   totalPage: number;
 }
+
+export type TProfileFileFields = {
+  idFrontPart?: Express.Multer.File[];
+  idBackPart?: Express.Multer.File[];
+  selfieWithId?: Express.Multer.File[];
+};

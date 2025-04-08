@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import {
   ExpertiseType,
   TArtistType,
@@ -8,6 +8,7 @@ import {
 import { locationSchema } from '../Location/location.model';
 
 export interface IArtist extends Document {
+  auth: Types.ObjectId;
   type: TArtistType;
   expertise: ExpertiseType[];
   image?: string;
@@ -20,4 +21,7 @@ export interface IArtist extends Document {
   services: TServices;
   contact: TContact;
   description: string;
+  isVerfied: boolean;
+  isDeleted: boolean;
+  isActive: boolean;
 }
