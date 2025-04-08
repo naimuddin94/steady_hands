@@ -2,6 +2,7 @@ import status from 'http-status';
 import { AppResponse, asyncHandler, options } from '../../utils';
 import { AuthService } from './auth.service';
 import { CookieOptions } from 'express';
+import { TProfileFileFields } from '../../types';
 
 const createAuth = asyncHandler(async (req, res) => {
   const result = await AuthService.createAuth(req.body);
@@ -39,8 +40,9 @@ const saveAuthData = asyncHandler(async (req, res) => {
 });
 
 const createProfile = asyncHandler(async (req, res) => {
+  const files = (req.files as TProfileFileFields) || {};
   const user = req.user;
-  const result = await AuthService.saveProfileIntoDB(req.body, user);
+  const result = await AuthService.saveProfileIntoDB(req.body, user, files);
   res
     .status(status.CREATED)
     .json(
