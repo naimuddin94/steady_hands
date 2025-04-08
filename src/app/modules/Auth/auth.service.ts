@@ -118,6 +118,15 @@ const saveProfileIntoDB = async (
   user: IAuth,
   files: TProfileFileFields
 ) => {
+  // 🔐 Prevent creating multiple profiles for same user
+  if (user.isProfile) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      'Profile already saved for this user'
+    );
+  }
+
+  // 🔍 Destructure relevant fields from the payload
   const {
     role,
     favoriteTattoos,
@@ -131,25 +140,18 @@ const saveProfileIntoDB = async (
     studioName,
   } = payload;
 
+  // 🧾 Start a MongoDB session for transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // 🔒 Check if profile already exists as CLIENT or ARTIST or BUSINESS
-    const [existingClient, existingArtist] = await Promise.all([
-      Client.findOne({ auth: user._id }),
-      Artist.findOne({ auth: user._id }),
-      // Add Business.findOne({ auth: user._id }) if you have a Business model
-    ]);
-
-    if (existingClient || existingArtist) {
-      throw new AppError(
-        status.BAD_REQUEST,
-        'Profile already exists for this user.'
-      );
-    }
-
+    /**
+     * ==========================
+     * 📌 CLIENT PROFILE CREATION
+     * ==========================
+     */
     if (role === ROLE.CLIENT) {
+      // Check if client profile already exists
       const isExistClient = await Client.findOne({ auth: user._id });
 
       if (isExistClient) {
@@ -159,11 +161,7 @@ const saveProfileIntoDB = async (
         );
       }
 
-      // Manually generate _id for the client so it can be used in both documents
-      const clientId = new mongoose.Types.ObjectId();
-      const preferencesId = new mongoose.Types.ObjectId();
-
-      // Step 1: Create Client
+      // Step 1: Create client profile
       const clientPayload = {
         role,
         favoriteTattoos,
@@ -171,32 +169,41 @@ const saveProfileIntoDB = async (
         radius,
         studioName,
         lookingFor,
-        notificationPreferences,
-        _id: clientId,
         auth: user._id,
-        preferences: preferencesId,
       };
 
       const [client] = await Client.create([clientPayload], { session });
 
-      // Step 2: Create Preferences
-      const [preferences] = await ClientPreferences.create(
+      // Step 2: Update Auth model to reflect profile creation
+      await Auth.findByIdAndUpdate(
+        user._id,
+        { role: ROLE.CLIENT, isProfile: true },
+        { session }
+      );
+
+      // Step 4: Commit transaction and return the client
+      await ClientPreferences.create(
         [
           {
-            _id: preferencesId,
-            clientId: clientId,
-            notificationPreferences: payload.notificationPreferences,
+            clientId: client._id,
+            notificationPreferences,
           },
         ],
         { session }
       );
 
-      // Step 3: Commit transaction
+      // Step 4: Commit transaction and return the client
       await session.commitTransaction();
       session.endSession();
 
       return client;
     } else if (role === ROLE.ARTIST) {
+      /**
+       * ==========================
+       * ✍️ ARTIST PROFILE CREATION
+       * ==========================
+       */
+      // Check if artist profile already exists
       const isExistArtist = await Artist.findOne({ auth: user._id });
 
       if (isExistArtist) {
@@ -206,10 +213,12 @@ const saveProfileIntoDB = async (
         );
       }
 
+      // Extract file paths for ID verification images
       const idCardFront = files.idFrontPart?.[0]?.path || '';
       const idCardBack = files.idBackPart?.[0]?.path || '';
       const selfieWithId = files.selfieWithId?.[0]?.path || '';
 
+      // Step 1: Create artist profile
       const artistPayload = {
         auth: user._id,
         type: artistType,
@@ -223,29 +232,33 @@ const saveProfileIntoDB = async (
 
       const [artist] = await Artist.create([artistPayload], { session });
 
+      // Step 2: Update Auth model to reflect artist status
       await Auth.findByIdAndUpdate(
         user._id,
-        { role: ROLE.ARTIST },
+        { role: ROLE.ARTIST, isProfile: true },
         { session }
       );
 
+      // Step 3: Commit transaction and return the artist
       await session.commitTransaction();
       session.endSession();
 
       return artist;
     }
   } catch (error) {
+    // ❌ Roll back transaction in case of any error
     await session.abortTransaction();
     session.endSession();
 
-    console.error('Error while saving profile:', error);
+    console.log(error);
 
+    // 🧼 Cleanup: Delete uploaded files to avoid storage bloat
     if (files && typeof files === 'object' && !Array.isArray(files)) {
       Object.values(files).forEach((fileArray) => {
         fileArray.forEach((file) => {
           try {
             if (file?.path && fs.existsSync(file.path)) {
-              fs.unlinkSync(file.path); // delete file
+              fs.unlinkSync(file.path);
             }
           } catch (deleteErr) {
             console.warn(
@@ -258,10 +271,12 @@ const saveProfileIntoDB = async (
       });
     }
 
+    // 🧾 Re-throw application-specific errors
     if (error instanceof AppError) {
       throw error;
     }
 
+    // 🧾 Throw generic internal server error
     throw new AppError(
       status.INTERNAL_SERVER_ERROR,
       'Failed to create client profile. Please try again.'

@@ -7,6 +7,7 @@ import {
   FavoriteTattoo,
   HomeView,
   ServiceType,
+  TNotificationChannel,
 } from './client.constant';
 
 export interface IClient extends Document {
@@ -21,6 +22,5 @@ export interface IClient extends Document {
   preferredArtistType: ArtistType;
   language: string;
   dateFormat: DateFormat;
-  preferences: mongoose.Types.ObjectId;
   auth: mongoose.Types.ObjectId;
 }

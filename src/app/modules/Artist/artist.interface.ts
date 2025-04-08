@@ -18,10 +18,13 @@ export interface IArtist extends Document {
   idCardBack: string;
   selfieWithId: string;
   profileViews: number;
-  services: TServices;
-  contact: TContact;
+  services?: TServices;
+  contact?: TContact;
   description: string;
   isVerfied: boolean;
   isDeleted: boolean;
   isActive: boolean;
+  flashes: Types.ObjectId[];
+  portfolio: Types.ObjectId[];
+  preferences?: Types.ObjectId;
 }

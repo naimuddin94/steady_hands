@@ -105,10 +105,21 @@ const artistSchema = new Schema<IArtist>(
       type: Boolean,
       default: true,
     },
+    flashes: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: true },
+    ],
+    portfolio: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: true },
+    ],
+    preferences: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ArtistPreferences',
+      required: false,
+    },
   },
   {
     timestamps: true,
-    versionKey: false, 
+    versionKey: false,
   }
 );
 

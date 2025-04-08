@@ -1,11 +1,10 @@
 import { Document, Types } from 'mongoose';
+import { TNotificationChannel } from '../Client/client.constant';
 
 export interface ConnectedAccount {
   provider: 'google' | 'apple' | 'facebook';
   connectedOn: Date;
 }
-
-export type NotificationChannel = 'app' | 'email' | 'sms';
 
 export interface IClientPreferences extends Document {
   clientId: Types.ObjectId;
@@ -19,7 +18,7 @@ export interface IClientPreferences extends Document {
   newAvailability: boolean;
   lastMinuteBookings: boolean;
   newGuestArtists: boolean;
-  notificationPreferences: NotificationChannel[];
+  notificationPreferences: TNotificationChannel[];
 
   // Connected Accounts
   connectedAccounts: ConnectedAccount[];

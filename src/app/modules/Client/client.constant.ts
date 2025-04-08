@@ -52,6 +52,12 @@ export const dateFormats = {
   YYYYMMDD: 'YYYY-MM-DD',
 } as const;
 
+export const notificationChannel = {
+  APP: 'app',
+  EMAIL: 'email',
+  SMS: 'sms',
+} as const;
+
 export type HomeView = (typeof homeViews)[keyof typeof homeViews];
 export type FavoriteTattoo =
   (typeof favoriteTattoos)[keyof typeof favoriteTattoos];
@@ -60,3 +66,4 @@ export type FavoritePiercing =
 export type ServiceType = (typeof serviceTypes)[keyof typeof serviceTypes];
 export type DateFormat = (typeof dateFormats)[keyof typeof dateFormats];
 export type ArtistType = (typeof artistTypes)[keyof typeof artistTypes];
+export type TNotificationChannel = (typeof notificationChannel)[keyof typeof notificationChannel];

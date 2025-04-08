@@ -72,12 +72,6 @@ const clientSchema = new Schema<IClient>(
       enum: Object.values(dateFormats),
       required: false,
     },
-
-    preferences: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ClientPreferences',
-      required: true,
-    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Auth',
