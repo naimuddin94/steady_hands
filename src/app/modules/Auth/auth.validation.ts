@@ -213,7 +213,7 @@ const profileSchema = z.object({
         })
         .optional(),
 
-      // 👇 Artist-specific fields
+      // 👇 Client-specific fields
       radius: z.number().min(0).optional(),
 
       lookingFor: z.array(zodEnumFromObject(serviceTypes)).optional(),
