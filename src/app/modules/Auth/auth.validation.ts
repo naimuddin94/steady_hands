@@ -8,6 +8,8 @@ import {
   homeViews,
   serviceTypes,
 } from '../Client/client.constant';
+import { ARTIST_TYPE, expertiseTypes } from '../Artist/artist.contant';
+import { ROLE } from './auth.constant';
 
 // Reusable validators
 const zodEnumFromObject = <T extends Record<string, string>>(obj: T) =>
@@ -211,25 +213,68 @@ const profileSchema = z.object({
         })
         .optional(),
 
+      // 👇 Artist-specific fields
       radius: z.number().min(0).optional(),
 
       lookingFor: z.array(zodEnumFromObject(serviceTypes)).optional(),
 
       favoriteTattoos: z.array(zodEnumFromObject(favoriteTattoos)).optional(),
 
-      preferredArtistType: zodEnumFromObject(artistTypes).optional(),
-
-      country: z.string().optional(),
-
       notificationPreferences: z
         .union([z.literal('app'), z.literal('email'), z.literal('sms')])
         .array()
         .optional(),
 
-      // for artist role access
-  
+      // 👇 Artist-specific fields
+      artistType: zodEnumFromObject(ARTIST_TYPE).optional(),
+      expertise: z.array(zodEnumFromObject(expertiseTypes)).optional(),
+      studioName: z.string().optional(),
+      city: z.string().optional(),
     })
-    .strict(),
+    .strict()
+    .superRefine((data, ctx) => {
+      if (data.role === 'ARTIST') {
+        if (!data.artistType) {
+          ctx.addIssue({
+            path: ['artistType'],
+            code: z.ZodIssueCode.custom,
+            message: 'Artist type is required.',
+          });
+        }
+
+        if (!data.expertise || data.expertise.length === 0) {
+          ctx.addIssue({
+            path: ['expertise'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please select at least one expertise.',
+          });
+        }
+
+        if (!data.studioName) {
+          ctx.addIssue({
+            path: ['studioName'],
+            code: z.ZodIssueCode.custom,
+            message: 'Studio name is required.',
+          });
+        }
+
+        if (!data.city) {
+          ctx.addIssue({
+            path: ['city'],
+            code: z.ZodIssueCode.custom,
+            message: 'City is required.',
+          });
+        }
+
+        if (!data.location) {
+          ctx.addIssue({
+            path: ['location'],
+            code: z.ZodIssueCode.custom,
+            message: 'Location is required.',
+          });
+        }
+      }
+    }),
 });
 
 export type TProfilePayload = z.infer<typeof profileSchema.shape.body>;
