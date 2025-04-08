@@ -13,6 +13,9 @@ import Client from '../Client/client.model';
 import ClientPreferences from '../ClientPreferences/clientPreferences.model';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import Artist from '../Artist/artist.model';
+import { TProfileFileFields } from '../../types';
+import fs from 'fs';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -110,7 +113,11 @@ const signinIntoDB = async (payload: { email: string; password: string }) => {
   };
 };
 
-const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
+const saveProfileIntoDB = async (
+  payload: TProfilePayload,
+  user: IAuth,
+  files: TProfileFileFields
+) => {
   const {
     role,
     favoriteTattoos,
@@ -118,12 +125,30 @@ const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
     radius,
     lookingFor,
     notificationPreferences,
+    artistType,
+    city,
+    expertise,
+    studioName,
   } = payload;
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    // 🔒 Check if profile already exists as CLIENT or ARTIST or BUSINESS
+    const [existingClient, existingArtist] = await Promise.all([
+      Client.findOne({ auth: user._id }),
+      Artist.findOne({ auth: user._id }),
+      // Add Business.findOne({ auth: user._id }) if you have a Business model
+    ]);
+
+    if (existingClient || existingArtist) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        'Profile already exists for this user.'
+      );
+    }
+
     if (role === ROLE.CLIENT) {
       const isExistClient = await Client.findOne({ auth: user._id });
 
@@ -144,6 +169,7 @@ const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
         favoriteTattoos,
         location,
         radius,
+        studioName,
         lookingFor,
         notificationPreferences,
         _id: clientId,
@@ -170,10 +196,67 @@ const saveProfileIntoDB = async (payload: TProfilePayload, user: IAuth) => {
       session.endSession();
 
       return client;
+    } else if (role === ROLE.ARTIST) {
+      const isExistArtist = await Artist.findOne({ auth: user._id });
+
+      if (isExistArtist) {
+        throw new AppError(
+          status.BAD_REQUEST,
+          'Artist profile already exists.'
+        );
+      }
+
+      const idCardFront = files.idFrontPart?.[0]?.path || '';
+      const idCardBack = files.idBackPart?.[0]?.path || '';
+      const selfieWithId = files.selfieWithId?.[0]?.path || '';
+
+      const artistPayload = {
+        auth: user._id,
+        type: artistType,
+        expertise,
+        location,
+        city,
+        idCardFront,
+        idCardBack,
+        selfieWithId,
+      };
+
+      const [artist] = await Artist.create([artistPayload], { session });
+
+      await Auth.findByIdAndUpdate(
+        user._id,
+        { role: ROLE.ARTIST },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return artist;
     }
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+
+    console.error('Error while saving profile:', error);
+
+    if (files && typeof files === 'object' && !Array.isArray(files)) {
+      Object.values(files).forEach((fileArray) => {
+        fileArray.forEach((file) => {
+          try {
+            if (file?.path && fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path); // delete file
+            }
+          } catch (deleteErr) {
+            console.warn(
+              'Failed to delete uploaded file:',
+              file.path,
+              deleteErr
+            );
+          }
+        });
+      });
+    }
 
     if (error instanceof AppError) {
       throw error;
