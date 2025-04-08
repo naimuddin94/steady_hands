@@ -28,3 +28,20 @@ export const validateRequestCookies = (schema: AnyZodObject) => {
     }
   );
 };
+
+export const validateRequestFromFormData = (schema: AnyZodObject) => {
+  return asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      if (req?.body?.data) {
+        await schema.parseAsync({
+          body: JSON.parse(req.body.data),
+          cookies: req.cookies,
+        });
+
+        req.body = JSON.parse(req.body.data);
+
+        next();
+      }
+    }
+  );
+};
