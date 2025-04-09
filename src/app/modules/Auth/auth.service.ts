@@ -17,6 +17,8 @@ import Artist from '../Artist/artist.model';
 import { TProfileFileFields } from '../../types';
 import fs from 'fs';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
+import Business from '../Business/business.model';
+import BusinessPreferences from '../BusinessPreferences/businessPreferences.model';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -139,7 +141,23 @@ const saveProfileIntoDB = async (
     city,
     expertise,
     studioName,
+    businessType,
+    servicesOffered,
+    operatingHours,
+    contactNumber,
+    contactEmail,
   } = payload;
+
+  // 📂 Extract file paths for ID verification images and business documents
+  const idCardFront = files.idFrontPart?.[0]?.path || '';
+  const idCardBack = files.idBackPart?.[0]?.path || '';
+  const selfieWithId = files.selfieWithId?.[0]?.path || '';
+
+  // Business-specific file extractions
+  const registrationCertificate =
+    files.registrationCertificate?.[0]?.path || '';
+  const taxIdOrEquivalent = files.taxIdOrEquivalent?.[0]?.path || '';
+  const studioLicense = files.studioLicense?.[0]?.path || '';
 
   // 🧾 Start a MongoDB session for transaction
   const session = await mongoose.startSession();
@@ -152,9 +170,7 @@ const saveProfileIntoDB = async (
      * ==========================
      */
     if (role === ROLE.CLIENT) {
-      // Check if client profile already exists
       const isExistClient = await Client.findOne({ auth: user._id });
-
       if (isExistClient) {
         throw new AppError(
           status.BAD_REQUEST,
@@ -162,7 +178,6 @@ const saveProfileIntoDB = async (
         );
       }
 
-      // Step 1: Create client profile
       const clientPayload = {
         role,
         favoriteTattoos,
@@ -175,14 +190,12 @@ const saveProfileIntoDB = async (
 
       const [client] = await Client.create([clientPayload], { session });
 
-      // Step 2: Update Auth model to reflect profile creation
       await Auth.findByIdAndUpdate(
         user._id,
         { role: ROLE.CLIENT, isProfile: true },
         { session }
       );
 
-      // Step 4: Commit transaction and return the client
       await ClientPreferences.create(
         [
           {
@@ -193,20 +206,12 @@ const saveProfileIntoDB = async (
         { session }
       );
 
-      // Step 4: Commit transaction and return the client
       await session.commitTransaction();
       session.endSession();
 
       return client;
     } else if (role === ROLE.ARTIST) {
-      /**
-       * ==========================
-       * ✍️ ARTIST PROFILE CREATION
-       * ==========================
-       */
-      // Check if artist profile already exists
       const isExistArtist = await Artist.findOne({ auth: user._id });
-
       if (isExistArtist) {
         throw new AppError(
           status.BAD_REQUEST,
@@ -214,12 +219,6 @@ const saveProfileIntoDB = async (
         );
       }
 
-      // Extract file paths for ID verification images
-      const idCardFront = files.idFrontPart?.[0]?.path || '';
-      const idCardBack = files.idBackPart?.[0]?.path || '';
-      const selfieWithId = files.selfieWithId?.[0]?.path || '';
-
-      // Step 1: Create artist profile
       const artistPayload = {
         auth: user._id,
         type: artistType,
@@ -233,28 +232,81 @@ const saveProfileIntoDB = async (
 
       const [artist] = await Artist.create([artistPayload], { session });
 
-      // Step 2: Create artist preferences
-      await ArtistPreferences.create([{ artistId: artist._id }], { session });
+      const [artistPreferences] = await ArtistPreferences.create(
+        [{ artistId: artist._id }],
+        { session }
+      );
 
-      // Step 2: Update Auth model to reflect artist status
       await Auth.findByIdAndUpdate(
         user._id,
         { role: ROLE.ARTIST, isProfile: true },
         { session }
       );
 
-      // Step 3: Commit transaction and return the artist
+      await Artist.findByIdAndUpdate(
+        artist._id,
+        { preferences: artistPreferences._id },
+        { session }
+      );
+
       await session.commitTransaction();
       session.endSession();
 
       return artist;
+    } else if (role === ROLE.BUSINESS) {
+      const isExistBusiness = await Business.findOne({ auth: user._id });
+      if (isExistBusiness) {
+        throw new AppError(
+          status.BAD_REQUEST,
+          'Business profile already exists.'
+        );
+      }
+
+      const businessPayload = {
+        auth: user._id,
+        studioName,
+        businessType,
+        servicesOffered,
+        location,
+        city,
+        contact: {
+          phone: contactNumber,
+          email: contactEmail,
+        },
+        operatingHours,
+        registrationCertificate,
+        taxIdOrEquivalent,
+        studioLicense,
+      };
+
+      const [business] = await Business.create([businessPayload], { session });
+
+      const [businessPreferences] = await BusinessPreferences.create(
+        [{ businessId: business._id }],
+        { session }
+      );
+
+      await Auth.findByIdAndUpdate(
+        user._id,
+        { role: ROLE.BUSINESS, isProfile: true },
+        { session }
+      );
+
+      await Business.findByIdAndUpdate(
+        business._id,
+        { preferences: businessPreferences._id },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return business;
     }
   } catch (error) {
     // ❌ Roll back transaction in case of any error
     await session.abortTransaction();
     session.endSession();
-
-    console.log(error);
 
     // 🧼 Cleanup: Delete uploaded files to avoid storage bloat
     if (files && typeof files === 'object' && !Array.isArray(files)) {

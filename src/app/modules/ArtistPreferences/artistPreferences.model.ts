@@ -1,19 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
+import { connectedAccountSchema } from '../ClientPreferences/clientPreferences.model';
 
-const connectedAccountSchema = new Schema(
-  {
-    provider: {
-      type: String,
-      enum: ['google', 'apple', 'facebook'],
-      required: true,
-    },
-    connectedOn: {
-      type: Date,
-      required: true,
-    },
-  },
-  { _id: false } // ✅ Disable _id for this sub-schema
-);
 
 const artistPreferencesSchema = new Schema(
   {

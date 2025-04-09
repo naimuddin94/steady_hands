@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-const connectedAccountSchema = new Schema({
+export const connectedAccountSchema = new Schema({
   provider: {
     type: String,
     enum: ['google', 'apple', 'facebook'],
