@@ -16,6 +16,7 @@ import mongoose from 'mongoose';
 import Artist from '../Artist/artist.model';
 import { TProfileFileFields } from '../../types';
 import fs from 'fs';
+import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -232,6 +233,9 @@ const saveProfileIntoDB = async (
 
       const [artist] = await Artist.create([artistPayload], { session });
 
+      // Step 2: Create artist preferences
+      await ArtistPreferences.create([{ artistId: artist._id }], { session });
+
       // Step 2: Update Auth model to reflect artist status
       await Auth.findByIdAndUpdate(
         user._id,
@@ -279,7 +283,7 @@ const saveProfileIntoDB = async (
     // 🧾 Throw generic internal server error
     throw new AppError(
       status.INTERNAL_SERVER_ERROR,
-      'Failed to create client profile. Please try again.'
+      'Failed to create profile. Please try again.'
     );
   }
 };
