@@ -8,8 +8,12 @@ import {
   homeViews,
   serviceTypes,
 } from '../Client/client.constant';
-import { ARTIST_TYPE, expertiseTypes } from '../Artist/artist.contant';
+import {
+  ARTIST_TYPE,
+  expertiseTypes,
+} from '../Artist/artist.contant';
 import { ROLE } from './auth.constant';
+import { OPERATING_DAYS, SERVICES_OFFERED } from '../Business/business.constants';
 
 // Reusable validators
 const zodEnumFromObject = <T extends Record<string, string>>(obj: T) =>
@@ -199,6 +203,104 @@ const createSchema = z.object({
   }),
 });
 
+// const profileSchema = z.object({
+//   body: z
+//     .object({
+//       role: z.enum(['CLIENT', 'ARTIST', 'BUSINESS'], {
+//         required_error: 'Role is required',
+//         invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
+//       }),
+//       location: z
+//         .object({
+//           longitude: z.number().min(-180).max(180),
+//           latitude: z.number().min(-90).max(90),
+//         })
+//         .optional(),
+
+//       // 👇 Client-specific fields
+//       radius: z.number().min(0).optional(),
+
+//       lookingFor: z.array(zodEnumFromObject(serviceTypes)).optional(),
+
+//       favoriteTattoos: z.array(zodEnumFromObject(favoriteTattoos)).optional(),
+
+//       notificationPreferences: z
+//         .union([z.literal('app'), z.literal('email'), z.literal('sms')])
+//         .array()
+//         .optional(),
+
+//       // 👇 Artist-specific fields
+//       artistType: zodEnumFromObject(ARTIST_TYPE).optional(),
+//       expertise: z.array(zodEnumFromObject(expertiseTypes)).optional(),
+//       studioName: z.string().optional(),
+//       city: z.string().optional(),
+
+//       // NEW for BUSINESS
+//       businessType: z.enum(['Studio', 'Event Organizer', 'Both']).optional(),
+//       servicesOffered: z.array(zodEnumFromObject(SERVICES_OFFERED)).optional(),
+//       contactNumber: z.string().optional(),
+//       contactEmail: z.string().email('Invalid email address').optional(),
+
+//       // Operating Hours (Weekly)
+//       operatingHours: z
+//         .record(
+//           zodEnumFromObject(OPERATING_DAYS),
+//           z.array(
+//             z.object({
+//               start: z.string().regex(/^\d{2}:\d{2}$/),
+//               end: z.string().regex(/^\d{2}:\d{2}$/),
+//             })
+//           )
+//         )
+//         .optional(),
+//     })
+
+//     .strict()
+//     .superRefine((data, ctx) => {
+//       if (data.role === 'ARTIST') {
+//         if (!data.artistType) {
+//           ctx.addIssue({
+//             path: ['artistType'],
+//             code: z.ZodIssueCode.custom,
+//             message: 'Artist type is required.',
+//           });
+//         }
+
+//         if (!data.expertise || data.expertise.length === 0) {
+//           ctx.addIssue({
+//             path: ['expertise'],
+//             code: z.ZodIssueCode.custom,
+//             message: 'Please select at least one expertise.',
+//           });
+//         }
+
+//         if (!data.studioName) {
+//           ctx.addIssue({
+//             path: ['studioName'],
+//             code: z.ZodIssueCode.custom,
+//             message: 'Studio name is required.',
+//           });
+//         }
+
+//         if (!data.city) {
+//           ctx.addIssue({
+//             path: ['city'],
+//             code: z.ZodIssueCode.custom,
+//             message: 'City is required.',
+//           });
+//         }
+
+//         if (!data.location) {
+//           ctx.addIssue({
+//             path: ['location'],
+//             code: z.ZodIssueCode.custom,
+//             message: 'Location is required.',
+//           });
+//         }
+//       }
+//     }),
+// });
+
 const profileSchema = z.object({
   body: z
     .object({
@@ -206,6 +308,7 @@ const profileSchema = z.object({
         required_error: 'Role is required',
         invalid_type_error: 'Role must be CLIENT, ARTIST or BUSINESS',
       }),
+
       location: z
         .object({
           longitude: z.number().min(-180).max(180),
@@ -213,11 +316,8 @@ const profileSchema = z.object({
         })
         .optional(),
 
-      // 👇 Client-specific fields
       radius: z.number().min(0).optional(),
-
       lookingFor: z.array(zodEnumFromObject(serviceTypes)).optional(),
-
       favoriteTattoos: z.array(zodEnumFromObject(favoriteTattoos)).optional(),
 
       notificationPreferences: z
@@ -225,11 +325,43 @@ const profileSchema = z.object({
         .array()
         .optional(),
 
-      // 👇 Artist-specific fields
       artistType: zodEnumFromObject(ARTIST_TYPE).optional(),
       expertise: z.array(zodEnumFromObject(expertiseTypes)).optional(),
       studioName: z.string().optional(),
       city: z.string().optional(),
+
+      // NEW for BUSINESS
+      businessType: z.enum(['Studio', 'Event Organizer', 'Both']).optional(),
+      servicesOffered: z
+        .array(zodEnumFromObject(SERVICES_OFFERED))
+        .optional(),
+      contactNumber: z.string().optional(),
+      contactEmail: z.string().email('Invalid email address').optional(),
+
+      // Operating Hours (Weekly)
+      operatingHours: z
+        .record(
+          zodEnumFromObject(OPERATING_DAYS),
+          z.array(
+            z
+              .object({
+                start: z.string().regex(/^\d{2}:\d{2}$/),
+                end: z.string().regex(/^\d{2}:\d{2}$/),
+              })
+              .refine(
+                (val) => {
+                  const [sh, sm] = val.start.split(':').map(Number);
+                  const [eh, em] = val.end.split(':').map(Number);
+                  return eh > sh || (eh === sh && em > sm);
+                },
+                {
+                  message: 'End time must be after start time.',
+                  path: ['end'],
+                }
+              )
+          )
+        )
+        .optional(),
     })
     .strict()
     .superRefine((data, ctx) => {
@@ -274,8 +406,59 @@ const profileSchema = z.object({
           });
         }
       }
+
+      if (data.role === 'BUSINESS') {
+        if (!data.studioName) {
+          ctx.addIssue({
+            path: ['studioName'],
+            code: z.ZodIssueCode.custom,
+            message: 'Business name is required.',
+          });
+        }
+
+        if (!data.businessType) {
+          ctx.addIssue({
+            path: ['businessType'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please select business type.',
+          });
+        }
+
+        if (!data.servicesOffered || data.servicesOffered.length === 0) {
+          ctx.addIssue({
+            path: ['servicesOffered'],
+            code: z.ZodIssueCode.custom,
+            message: 'Select at least one service offered.',
+          });
+        }
+
+        if (!data.location) {
+          ctx.addIssue({
+            path: ['location'],
+            code: z.ZodIssueCode.custom,
+            message: 'Primary location is required.',
+          });
+        }
+
+        if (!data.contactNumber) {
+          ctx.addIssue({
+            path: ['contactNumber'],
+            code: z.ZodIssueCode.custom,
+            message: 'Phone number is required.',
+          });
+        }
+
+        if (!data.contactEmail) {
+          ctx.addIssue({
+            path: ['contactEmail'],
+            code: z.ZodIssueCode.custom,
+            message: 'Email address is required.',
+          });
+        }
+      }
     }),
 });
+
 
 export type TProfilePayload = z.infer<typeof profileSchema.shape.body>;
 
