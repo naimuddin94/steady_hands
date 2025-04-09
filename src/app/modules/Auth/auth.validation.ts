@@ -1,13 +1,6 @@
 import { z } from 'zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import {
-  artistTypes,
-  dateFormats,
-  favoritePiercings,
-  favoriteTattoos,
-  homeViews,
-  serviceTypes,
-} from '../Client/client.constant';
+import { favoriteTattoos, serviceTypes } from '../Client/client.constant';
 import { ARTIST_TYPE, expertiseTypes } from '../Artist/artist.contant';
 import { ROLE } from './auth.constant';
 import {
@@ -245,8 +238,12 @@ const profileSchema = z.object({
           z.array(
             z
               .object({
-                start: z.string().regex(/^\d{2}:\d{2}$/),
-                end: z.string().regex(/^\d{2}:\d{2}$/),
+                start: z.string().regex(/^\d{2}:\d{2}$/, {
+                  message: 'Invalid time format. Use HH:MM.',
+                }),
+                end: z.string().regex(/^\d{2}:\d{2}$/, {
+                  message: 'Invalid time format. Use HH:MM.',
+                }),
               })
               .refine(
                 (val) => {
@@ -265,7 +262,7 @@ const profileSchema = z.object({
     })
     .strict()
     .superRefine((data, ctx) => {
-      if (data.role === 'ARTIST') {
+      if (data.role === ROLE.ARTIST) {
         if (!data.artistType) {
           ctx.addIssue({
             path: ['artistType'],
@@ -307,7 +304,7 @@ const profileSchema = z.object({
         }
       }
 
-      if (data.role === 'BUSINESS') {
+      if (data.role === ROLE.BUSINESS) {
         if (!data.studioName) {
           ctx.addIssue({
             path: ['studioName'],
