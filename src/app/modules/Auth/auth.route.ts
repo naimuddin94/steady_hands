@@ -36,4 +36,11 @@ router.route('/create-profile').post(
   AuthController.createProfile
 );
 
+router
+  .route('/social-signin')
+  .post(
+    validateRequest(AuthValidation.socialSchema),
+    AuthController.socialSignin
+  );
+
 export const AuthRoutes = router;

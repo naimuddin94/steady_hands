@@ -14,7 +14,7 @@ import ClientPreferences from '../ClientPreferences/clientPreferences.model';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import Artist from '../Artist/artist.model';
-import { TProfileFileFields } from '../../types';
+import { TProfileFileFields, TSocialLoginPayload } from '../../types';
 import fs from 'fs';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import Business from '../Business/business.model';
@@ -340,10 +340,74 @@ const saveProfileIntoDB = async (
   }
 };
 
+const socialLoginServices = async (payload: TSocialLoginPayload) => {
+  const { email, fcmToken, image, fullName, address } = payload;
+
+  // Check if user exists
+  const auth = await Auth.findOne({ email });
+
+  if (!auth) {
+    const authRes = await Auth.create({
+      email,
+      fcmToken,
+      image,
+      fullName,
+      address,
+      isSocialLogin: true,
+      isVerified: true,
+    });
+
+    if (!authRes) {
+      throw new AppError(
+        status.INTERNAL_SERVER_ERROR,
+        'Fail to create user into database'
+      );
+    }
+
+    const accessToken = authRes.generateAccessToken();
+    const refreshToken = authRes.generateRefreshToken();
+
+    await Auth.findByIdAndUpdate(authRes._id, { refreshToken });
+
+    return {
+      response: {
+        fullName: authRes.fullName,
+        email: authRes.email,
+        phoneNumber: authRes.phoneNumber,
+        role: authRes.role,
+        image: authRes.image,
+        isProfile: authRes.isProfile,
+      },
+      accessToken,
+      refreshToken,
+    };
+  } else {
+    const accessToken = auth.generateAccessToken();
+    const refreshToken = auth.generateRefreshToken();
+
+    auth.refreshToken = refreshToken;
+    await auth.save({ validateBeforeSave: false });
+
+    return {
+      response: {
+        fullName: auth.fullName,
+        email: auth.email,
+        phoneNumber: auth.phoneNumber,
+        role: auth.role,
+        image: auth.image,
+        isProfile: auth.isProfile,
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
   signupOtpSendAgin,
   saveProfileIntoDB,
   signinIntoDB,
+  socialLoginServices,
 };

@@ -356,6 +356,20 @@ const profileSchema = z.object({
     }),
 });
 
+const socialSchema = z.object({
+  body: z.object({
+    email: z
+      .string()
+      .email('Invalid email address')
+      .nonempty('Email is required'),
+    fcmToken: z.string().nonempty('FCM Token is required'),
+    image: z.string().url('Image URL must be a valid URL').optional(),
+    fullName: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    address: z.string().optional(),
+  }),
+});
+
 export type TProfilePayload = z.infer<typeof profileSchema.shape.body>;
 
 export const AuthValidation = {
@@ -369,4 +383,5 @@ export const AuthValidation = {
   accessTokenSchema,
   createSchema,
   profileSchema,
+  socialSchema,
 };

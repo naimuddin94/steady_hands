@@ -16,6 +16,10 @@ const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
       type: String,
       required: false,
     },
+    image: {
+      type: String,
+      required: false,
+    },
     phoneNumber: {
       type: String,
       required: false,

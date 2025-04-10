@@ -58,10 +58,22 @@ const signin = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Signin successfully'));
 });
 
+const socialSignin = asyncHandler(async (req, res) => {
+  const { response, accessToken, refreshToken } =
+    await AuthService.socialLoginServices(req.body);
+
+  res
+    .status(status.OK)
+    .cookie('accessToken', accessToken, options as CookieOptions)
+    .cookie('refreshToken', refreshToken, options as CookieOptions)
+    .json(new AppResponse(status.OK, response, 'Signin successfully'));
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
   signupOtpSendAgin,
   createProfile,
   signin,
+  socialSignin,
 };

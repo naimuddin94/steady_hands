@@ -18,3 +18,12 @@ export type TProfileFileFields = {
   taxIdOrEquivalent?: Express.Multer.File[];
   studioLicense?: Express.Multer.File[];
 };
+
+export type TSocialLoginPayload = {
+  email: string;
+  fcmToken: string;
+  image?: string;
+  fullName?: string;
+  phoneNumber?: string;
+  address?: string;
+};
