@@ -36,7 +36,7 @@ const createAuth = async (payload: IAuth) => {
   return { token, otp };
 };
 
-const signupOtpSendAgin = async (token: string) => {
+const signupOtpSendAgain = async (token: string) => {
   const decoded = jwt.decode(token) as JwtPayload;
 
   const authData = {
@@ -403,11 +403,38 @@ const socialLoginServices = async (payload: TSocialLoginPayload) => {
   }
 };
 
+const updateProfilePhoto = async (
+  user: IAuth,
+  file: Express.Multer.File | undefined
+) => {
+  if (!file?.path) {
+    throw new AppError(status.BAD_REQUEST, 'File is required');
+  }
+
+  // Delete the previous image if exists
+  if (user?.image) {
+    try {
+      await fs.promises.unlink(user.image);
+    } catch (error) {
+      console.error('Error deleting old file:', error);
+    }
+  }
+
+  const res = await Auth.findByIdAndUpdate(
+    user._id,
+    { image: file.path },
+    { new: true }
+  ).select('fullName email image role isProfile phoneNumber');
+
+  return res;
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
-  signupOtpSendAgin,
+  signupOtpSendAgain,
   saveProfileIntoDB,
   signinIntoDB,
   socialLoginServices,
+  updateProfilePhoto,
 };

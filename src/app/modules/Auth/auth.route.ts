@@ -20,7 +20,9 @@ router
 
 router.route('/verify-signup-otp').post(AuthController.saveAuthData);
 
-router.route('/verify-signup-otp-again').post(AuthController.signupOtpSendAgin);
+router
+  .route('/verify-signup-otp-again')
+  .post(AuthController.signupOtpSendAgain);
 
 router.route('/create-profile').post(
   upload.fields([
@@ -42,5 +44,9 @@ router
     validateRequest(AuthValidation.socialSchema),
     AuthController.socialSignin
   );
+
+router
+  .route('/profile-image')
+  .put(auth(), upload.single('file'), AuthController.updateProfilePhoto);
 
 export const AuthRoutes = router;

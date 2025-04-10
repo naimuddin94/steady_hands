@@ -12,9 +12,9 @@ const createAuth = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'OTP send successfully'));
 });
 
-const signupOtpSendAgin = asyncHandler(async (req, res) => {
+const signupOtpSendAgain = asyncHandler(async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1] || '';
-  const result = await AuthService.signupOtpSendAgin(token);
+  const result = await AuthService.signupOtpSendAgain(token);
 
   res
     .status(status.OK)
@@ -69,11 +69,22 @@ const socialSignin = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, response, 'Signin successfully'));
 });
 
+const updateProfilePhoto = asyncHandler(async (req, res) => {
+  const result = await AuthService.updateProfilePhoto(req.user, req.file);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, result, 'Profile photo update successfully')
+    );
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
-  signupOtpSendAgin,
+  signupOtpSendAgain,
   createProfile,
   signin,
   socialSignin,
+  updateProfilePhoto,
 };

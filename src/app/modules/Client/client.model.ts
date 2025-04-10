@@ -12,11 +12,6 @@ import { locationSchema } from '../Location/location.model';
 
 const clientSchema = new Schema<IClient>(
   {
-    image: {
-      type: String,
-      required: false,
-    },
-
     location: {
       type: locationSchema,
       required: false,

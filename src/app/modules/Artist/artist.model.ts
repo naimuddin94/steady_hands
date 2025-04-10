@@ -44,8 +44,6 @@ const artistSchema = new Schema<IArtist>(
       required: true,
     },
 
-    image: { type: String },
-
     location: {
       type: locationSchema,
       required: true,
