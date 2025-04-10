@@ -9,7 +9,7 @@ import {
 } from '../Business/business.constants';
 
 // Reusable validators
-const zodEnumFromObject = <T extends Record<string, string>>(obj: T) =>
+export const zodEnumFromObject = <T extends Record<string, string>>(obj: T) =>
   z.enum([...Object.values(obj)] as [string, ...string[]]);
 
 const signinSchema = z.object({

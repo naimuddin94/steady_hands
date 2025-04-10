@@ -101,7 +101,7 @@ const signinIntoDB = async (payload: { email: string; password: string }) => {
   );
 
   if (!isPasswordCorrect) {
-    throw new AppError(status.UNAUTHORIZED, 'Invalide credentials');
+    throw new AppError(status.UNAUTHORIZED, 'Invalid credentials');
   }
 
   const accessToken = user.generateAccessToken();
