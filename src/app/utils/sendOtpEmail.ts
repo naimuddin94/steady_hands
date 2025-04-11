@@ -121,7 +121,7 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
       attachments: [
         {
           filename: 'logo.png',
-          path: path.join(__dirname, '/assets/logo.png'),
+          path: path.join(__dirname, 'assets', 'logo.png'),
           cid: 'steady_hands_logo',
         },
       ],

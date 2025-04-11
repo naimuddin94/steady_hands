@@ -56,6 +56,42 @@ const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
   }
 };
 
+const updatePreferences = async (
+  user: IAuth,
+  payload: {
+    favoriteTattooStyles?: FavoriteTattoo[];
+    favoritePiercings?: string[];
+    defaultHomeView?: string;
+    preferredArtistType?: string;
+    language?: string;
+    dateFormat?: string;
+    notificationChannels?: string[];
+  }
+) => {
+  const client = await Client.findOne({ auth: user._id });
+  if (!client) {
+    throw new AppError(status.NOT_FOUND, 'Client not found');
+  }
+
+  const preferences = await ClientPreferences.findOneAndUpdate(
+    {
+      clientId: client._id,
+    },
+    payload,
+    { new: true }
+  );
+
+  if (!preferences) {
+    throw new AppError(
+      status.NOT_FOUND,
+      'Preferences not found for this client'
+    );
+  }
+
+  return preferences;
+};
+
 export const ClientService = {
   updateProfile,
+  updatePreferences,
 };
