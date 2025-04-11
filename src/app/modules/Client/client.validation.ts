@@ -80,8 +80,25 @@ const privacySecuritySchema = z.object({
   }),
 });
 
+const profileInfoSchema = z.object({
+  body: z
+    .object({
+      fullName: z
+        .string()
+        .nonempty('Name is required')
+        .min(3, 'Name must be at least 3 characters long')
+        .max(100, 'Name cannot exceed 100 characters')
+        .optional(),
+      country: z.string().nonempty('Country is required').optional(),
+    })
+    .strict(),
+});
+
+export type TUpdateProfilePayload = z.infer<typeof profileInfoSchema.shape.body>;
+
 export const ClientValidation = {
   preferencesSchema,
   notificationSchema,
   privacySecuritySchema,
+  profileInfoSchema
 };
