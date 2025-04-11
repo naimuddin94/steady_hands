@@ -2,6 +2,7 @@ import status from 'http-status';
 import nodemailer from 'nodemailer';
 import config from '../config';
 import AppError from './AppError';
+import path from 'path';
 
 const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
   try {
@@ -42,16 +43,20 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
                 padding-bottom: 20px;
                 border-bottom: 2px solid #f0f0f0;
               }
+              .header img {
+                max-width: 150px;
+                margin-bottom: 20px;
+              }
               .header h2 {
-                color: #FF6347; /* Donation App Theme Color */
+                color: #816A6B; /* Steady Hands theme color */
               }
               .otp {
                 font-size: 24px;
                 font-weight: bold;
-                color: #FF6347;
+                color: #816A6B;
                 padding: 12px;
                 background-color: #fff8e1;
-                border-left: 4px solid #FF6347;
+                border-left: 4px solid #816A6B;
                 text-align: center;
                 margin: 20px 0;
               }
@@ -62,7 +67,6 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
                 padding-top: 20px;
                 border-top: 2px solid #f0f0f0;
               }
-
               @media only screen and (max-width: 600px) {
                 .container {
                   padding: 15px;
@@ -84,8 +88,9 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
 
             <div class="container">
               <div class="header">
-                <h2>Thank You for Your Commitment to Making a Difference!</h2>
-                <p>Your support helps create a brighter future for those in need.</p>
+                <img src="cid:steady_hands_logo" alt="Steady Hands Logo"> <!-- Ensure this is the correct logo path -->
+                <h2>Thank You for Joining Steady Hands!</h2>
+                <p>We're excited to help you grow your studio.</p>
               </div>
 
               <p>Hello ${fullName},</p>
@@ -95,17 +100,16 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
                 ${otp}
               </div>
 
-              <p>Please enter this OTP to complete your email verification and continue supporting meaningful causes.</p>
+              <p>Please enter this OTP to complete your email verification and start using Steady Hands to grow your studio.</p>
               <p><strong>Note:</strong> This OTP will expire in 5 minutes. Be sure to enter it before it expires.</p>
 
               <div class="footer">
-                <p>Thank you for being a part of our mission. If you did not request this, please ignore this email.</p>
+                <p>Thank you for being a part of Steady Hands. If you did not request this, please ignore this email.</p>
               </div>
             </div>
 
           </body>
           </html>
-
   `;
 
     // Email options: from, to, subject, and HTML body
@@ -114,11 +118,19 @@ const sendOtpEmail = async (email: string, otp: string, fullName: string) => {
       to: email, // Recipient's email address
       subject: 'Your OTP for Account Verification',
       html: htmlTemplate,
+      attachments: [
+        {
+          filename: 'logo.png',
+          path: path.join(__dirname, '/assets/logo.png'),
+          cid: 'steady_hands_logo',
+        },
+      ],
     };
 
     // Send the email using Nodemailer
     await transporter.sendMail(mailOptions);
-  } catch {
+  } catch (error) {
+    console.log(error);
     throw new AppError(status.INTERNAL_SERVER_ERROR, 'Failed to send email');
   }
 };
