@@ -111,6 +111,12 @@ authSchema.methods.generateRefreshToken = function () {
   );
 };
 
+// For check the password is correct
+authSchema.methods.isPasswordCorrect = async function (password: string) {
+  return await bcrypt.compare(password, this.password);
+};
+
+
 const Auth = mongoose.model<IAuth, IAuthModel>('Auth', authSchema);
 
 export default Auth;

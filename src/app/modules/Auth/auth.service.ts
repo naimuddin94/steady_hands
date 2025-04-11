@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { generateOtp } from '../../lib';
+import { generateOtp, verifyToken } from '../../lib';
 import sendOtpSms from '../../utils/sendOtpSms';
 import { IAuth } from './auth.interface';
 import config from '../../config';
 import { AppError } from '../../utils';
 import status from 'http-status';
 import Auth from './auth.model';
-import { TProfilePayload } from './auth.validation';
+import { AuthValidation, TProfilePayload } from './auth.validation';
 import { ROLE } from './auth.constant';
 import Client from '../Client/client.model';
 import ClientPreferences from '../ClientPreferences/clientPreferences.model';
@@ -19,6 +19,7 @@ import fs from 'fs';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import Business from '../Business/business.model';
 import BusinessPreferences from '../BusinessPreferences/businessPreferences.model';
+import { z } from 'zod';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -429,6 +430,36 @@ const updateProfilePhoto = async (
   return res;
 };
 
+const changePasswordIntoDB = async (
+  accessToken: string,
+  payload: z.infer<typeof AuthValidation.passwordChangeSchema.shape.body>
+) => {
+  const { id } = await verifyToken(accessToken);
+
+  const user = await Auth.findOne({ _id: id, isActive: true }).select(
+    '+password'
+  );
+
+  console.log(user)
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'User not exists');
+  }
+
+  const isCredentialsCorrect = await user.isPasswordCorrect(
+    payload.oldPassword
+  );
+
+  if (!isCredentialsCorrect) {
+    throw new AppError(status.UNAUTHORIZED, 'Current password is not correct');
+  }
+
+  user.password = payload.newPassword;
+  await user.save();
+
+  return null;
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
@@ -437,4 +468,5 @@ export const AuthService = {
   signinIntoDB,
   socialLoginServices,
   updateProfilePhoto,
+  changePasswordIntoDB,
 };

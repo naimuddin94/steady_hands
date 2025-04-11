@@ -17,6 +17,7 @@ export interface IAuth extends Document {
 }
 
 export interface IAuthMethods {
+  isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
 }

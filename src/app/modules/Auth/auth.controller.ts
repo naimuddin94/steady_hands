@@ -55,12 +55,16 @@ const signin = asyncHandler(async (req, res) => {
 
   res
     .status(status.OK)
+    .cookie('accessToken', result.accessToken, options as CookieOptions)
+    .cookie('refreshToken', result.refreshToken, options as CookieOptions)
     .json(new AppResponse(status.OK, result, 'Signin successfully'));
 });
 
 const socialSignin = asyncHandler(async (req, res) => {
   const { response, accessToken, refreshToken } =
     await AuthService.socialLoginServices(req.body);
+
+  console.log({ accessToken, refreshToken });
 
   res
     .status(status.OK)
@@ -79,6 +83,15 @@ const updateProfilePhoto = asyncHandler(async (req, res) => {
     );
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const accessToken = req.cookies.accessToken;
+  const result = await AuthService.changePasswordIntoDB(accessToken, req.body);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Password change successfully'));
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
@@ -87,4 +100,5 @@ export const AuthController = {
   signin,
   socialSignin,
   updateProfilePhoto,
+  changePassword,
 };

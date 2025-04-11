@@ -46,6 +46,14 @@ router
   );
 
 router
+  .route('/change-password')
+  .patch(
+    auth(),
+    validateRequest(AuthValidation.passwordChangeSchema),
+    AuthController.changePassword
+  );
+
+router
   .route('/profile-image')
   .put(auth(), upload.single('file'), AuthController.updateProfilePhoto);
 

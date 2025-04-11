@@ -27,9 +27,6 @@ app.use(cookieParser());
 // static files
 app.use('/public', express.static('public'));
 
-// ✅ Apply Stripe raw body middleware BEFORE json parser
-app.use('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }));
-
 //parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
