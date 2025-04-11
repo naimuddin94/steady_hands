@@ -4,7 +4,7 @@ import { generateOtp, verifyToken } from '../../lib';
 import sendOtpSms from '../../utils/sendOtpSms';
 import { IAuth } from './auth.interface';
 import config from '../../config';
-import { AppError } from '../../utils';
+import { AppError, sendOtpEmail } from '../../utils';
 import status from 'http-status';
 import Auth from './auth.model';
 import { AuthValidation, TProfilePayload } from './auth.validation';
@@ -440,7 +440,7 @@ const changePasswordIntoDB = async (
     '+password'
   );
 
-  console.log(user)
+  console.log(user);
 
   if (!user) {
     throw new AppError(status.NOT_FOUND, 'User not exists');
@@ -460,6 +460,97 @@ const changePasswordIntoDB = async (
   return null;
 };
 
+const forgotPassword = async (email: string) => {
+  const user = await Auth.findOne({ email, isActive: true });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'User not found');
+  }
+
+  const otp = generateOtp();
+  await user.save();
+  await sendOtpEmail(email, otp, user.fullName || 'Guest');
+
+  const token = jwt.sign(
+    {
+      email,
+      verificationCode: otp,
+      verificationExpiry: new Date(Date.now() + 5 * 60 * 1000),
+    },
+    config.jwt_access_secret!,
+    {
+      expiresIn: '5m',
+    }
+  );
+
+  return { token };
+};
+
+const verifyOtpForForgetPassword = async (payload: {
+  token: string;
+  otp: string;
+}) => {
+  const { email, verificationCode, verificationExpiry } = (await verifyToken(
+    payload.token
+  )) as any;
+  const user = await Auth.findOne({ email, isActive: true });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'User not found');
+  }
+
+  // Check if the OTP matches
+  if (verificationCode !== payload.otp || !verificationExpiry) {
+    throw new AppError(status.BAD_REQUEST, 'Invalid OTP');
+  }
+
+  console.log({ verificationExpiry });
+
+  // Check if OTP has expired
+  if (Date.now() > new Date(verificationExpiry).getTime()) {
+    throw new AppError(status.BAD_REQUEST, 'OTP has expired');
+  }
+
+  const resetPasswordToken = jwt.sign(
+    {
+      email: user.email,
+      isResetPassword: true,
+    },
+    config.jwt_access_secret!,
+    {
+      expiresIn: '5d',
+    }
+  );
+
+  return { resetPasswordToken };
+};
+
+const resetPasswordIntoDB = async (
+  resetPasswordToken: string,
+  newPassword: string
+) => {
+  const { email, isResetPassword } = (await verifyToken(
+    resetPasswordToken
+  )) as any;
+
+  const user = await Auth.findOne({ email, isActive: true });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, 'User not found');
+  }
+
+  // Check if the OTP matches
+  if (!isResetPassword) {
+    throw new AppError(status.BAD_REQUEST, 'Invalid reset password token or ');
+  }
+
+  // Update the user's password
+  user.password = newPassword;
+  await user.save();
+
+  return null;
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
@@ -469,4 +560,7 @@ export const AuthService = {
   socialLoginServices,
   updateProfilePhoto,
   changePasswordIntoDB,
+  forgotPassword,
+  verifyOtpForForgetPassword,
+  resetPasswordIntoDB,
 };

@@ -53,6 +53,28 @@ router
     AuthController.changePassword
   );
 
+// For forget password
+router
+  .route('/forget-password')
+  .post(
+    validateRequest(AuthValidation.forgetPasswordSchema),
+    AuthController.forgetPassword
+  );
+
+router
+  .route('/forget-password-verify')
+  .post(
+    validateRequest(AuthValidation.forgetPasswordVerifySchema),
+    AuthController.verifyOtpForForgetPassword
+  );
+
+router
+  .route('/reset-password')
+  .post(
+    validateRequest(AuthValidation.resetPasswordSchema),
+    AuthController.resetPassword
+  );
+
 router
   .route('/profile-image')
   .put(auth(), upload.single('file'), AuthController.updateProfilePhoto);

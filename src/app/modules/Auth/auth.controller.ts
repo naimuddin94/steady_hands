@@ -92,6 +92,45 @@ const changePassword = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Password change successfully'));
 });
 
+// For forget password
+const forgetPassword = asyncHandler(async (req, res) => {
+  const email = req.body.email;
+
+  const result = await AuthService.forgotPassword(email);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result,
+        'Your OTP has been successfully sent to your email. If you do not find the email in your inbox, please check your spam or junk folder.'
+      )
+    );
+});
+
+const verifyOtpForForgetPassword = asyncHandler(async (req, res) => {
+  const result = await AuthService.verifyOtpForForgetPassword(req.body);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'OTP verified successfully'));
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const resetPasswordToken =
+    req.header('Authorization')?.replace('Bearer ', '') ||
+    req.cookies?.resetPasswordToken;
+  const result = await AuthService.resetPasswordIntoDB(
+    resetPasswordToken,
+    req.body.newPassword
+  );
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Reset password successfully'));
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
@@ -101,4 +140,7 @@ export const AuthController = {
   socialSignin,
   updateProfilePhoto,
   changePassword,
+  forgetPassword,
+  verifyOtpForForgetPassword,
+  resetPassword,
 };

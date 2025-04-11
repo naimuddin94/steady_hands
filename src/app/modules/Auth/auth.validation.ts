@@ -86,6 +86,18 @@ const otpSchema = z.object({
   }),
 });
 
+const forgetPasswordVerifySchema = z.object({
+  body: z.object({
+    token: z.string({ required_error: 'Token is required' }),
+    otp: z
+      .string({
+        required_error: 'OTP is required',
+      })
+      .regex(/^\d+$/, { message: 'OTP must be a number' })
+      .length(6, { message: 'OTP must be exactly 6 digits' }),
+  }),
+});
+
 const forgetPasswordSchema = z.object({
   body: z.object({
     email: z
@@ -384,4 +396,5 @@ export const AuthValidation = {
   createSchema,
   profileSchema,
   socialSchema,
+  forgetPasswordVerifySchema
 };
