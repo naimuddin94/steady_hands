@@ -43,8 +43,26 @@ const updateNotificationPreferences = asyncHandler(async (req, res) => {
     );
 });
 
+const updatePrivacySecuritySettings = asyncHandler(async (req, res) => {
+  const result = await ClientService.updatePrivacySecuritySettings(
+    req.user,
+    req.body
+  );
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result,
+        'Privacy and security settings updated successfully'
+      )
+    );
+});
+
 export const ClientController = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
+  updatePrivacySecuritySettings,
 };

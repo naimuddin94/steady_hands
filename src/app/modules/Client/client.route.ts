@@ -30,4 +30,12 @@ router
     ClientController.updateNotificationPreferences
   );
 
+router
+  .route('/privacy-security')
+  .patch(
+    auth(ROLE.CLIENT),
+    validateRequest(ClientValidation.privacySecuritySchema),
+    ClientController.updatePrivacySecuritySettings
+  );
+
 export const ClientRoutes = router;

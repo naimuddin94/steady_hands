@@ -150,6 +150,14 @@ const NotificationPreferencesSchema = z.object({
   }),
 });
 
+export const securitySettingsSchema = z.object({
+  body: z.object({
+    twoFactorAuthEnabled: z.boolean().optional(),
+    personalizedContent: z.boolean().optional(),
+    locationSuggestions: z.boolean().optional(),
+  }),
+});
+
 export type TUpdateProfilePayload = z.infer<
   typeof profileInfoSchema.shape.body
 >;
@@ -162,10 +170,15 @@ export type TUpdateNotificationPayload = z.infer<
   typeof NotificationPreferencesSchema.shape.body
 >;
 
+export type TUpdateSecuritySettingsPayload = z.infer<
+  typeof securitySettingsSchema.shape.body
+>;
+
 export const ClientValidation = {
   preferencesSchema,
   notificationSchema,
   privacySecuritySchema,
   profileInfoSchema,
   clientPreferencesSchema,
+  securitySettingsSchema
 };

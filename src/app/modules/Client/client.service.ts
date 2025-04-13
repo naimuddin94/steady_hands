@@ -4,14 +4,11 @@ import { IAuth } from '../Auth/auth.interface';
 import { AppError } from '../../utils';
 import status from 'http-status';
 import mongoose from 'mongoose';
-import { TProfilePayload } from '../Auth/auth.validation';
-import fs from 'fs';
-import { FavoriteTattoo } from './client.constant';
-import { z } from 'zod';
 import {
   TUpdateNotificationPayload,
   TUpdatePreferencePayload,
   TUpdateProfilePayload,
+  TUpdateSecuritySettingsPayload,
 } from './client.validation';
 import Auth from '../Auth/auth.model';
 
@@ -118,8 +115,37 @@ const updateNotificationPreferences = async (
   return preferences;
 };
 
+const updatePrivacySecuritySettings = async (
+  user: IAuth,
+  payload: TUpdateSecuritySettingsPayload
+) => {
+  const clientPreferences = await ClientPreferences.findOne({
+    clientId: user._id,
+  });
+
+  if (!clientPreferences) {
+    throw new AppError(status.NOT_FOUND, 'Client preferences not found');
+  }
+
+  if (payload.twoFactorAuthEnabled !== undefined) {
+    clientPreferences.twoFactorAuthEnabled = payload.twoFactorAuthEnabled;
+  }
+  if (payload.personalizedContent !== undefined) {
+    clientPreferences.personalizedContent = payload.personalizedContent;
+  }
+  if (payload.locationSuggestions !== undefined) {
+    clientPreferences.locationSuggestions =
+      payload.locationSuggestions;
+  }
+
+  await clientPreferences.save();
+
+  return clientPreferences;
+};
+
 export const ClientService = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
+  updatePrivacySecuritySettings,
 };
