@@ -2,6 +2,7 @@ import { Document, Model } from 'mongoose';
 import { TRole } from './auth.constant';
 
 export interface IAuth extends Document {
+  createdAt: any;
   email: string;
   fullName?: string;
   phoneNumber: string;

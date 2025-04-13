@@ -20,6 +20,7 @@ import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import Business from '../Business/business.model';
 import BusinessPreferences from '../BusinessPreferences/businessPreferences.model';
 import { z } from 'zod';
+import { IClientPreferences } from '../ClientPreferences/clientPreferences.interface';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });
@@ -199,21 +200,27 @@ const saveProfileIntoDB = async (
 
       const [client] = await Client.create([clientPayload], { session });
 
+      const clientPreferenceData: any = {
+        clientId: client._id,
+        notificationPreferences,
+      };
+
+      if (user?.isSocialLogin) {
+        clientPreferenceData.connectedAccounts = [
+          {
+            provider: 'google',
+            connectedOn: user?.createdAt || new Date(),
+          },
+        ];
+      }
+
       await Auth.findByIdAndUpdate(
         user._id,
         { role: ROLE.CLIENT, isProfile: true },
         { session }
       );
 
-      await ClientPreferences.create(
-        [
-          {
-            clientId: client._id,
-            notificationPreferences,
-          },
-        ],
-        { session }
-      );
+      await ClientPreferences.create([clientPreferenceData], { session });
 
       await session.commitTransaction();
       session.endSession();

@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import { IClientPreferences } from './clientPreferences.interface';
 
 export const connectedAccountSchema = new Schema({
   provider: {
@@ -12,7 +13,7 @@ export const connectedAccountSchema = new Schema({
   },
 });
 
-const clientPreferencesSchema = new Schema(
+const clientPreferencesSchema = new Schema<IClientPreferences>(
   {
     clientId: {
       type: Schema.Types.ObjectId,
@@ -50,7 +51,7 @@ const clientPreferencesSchema = new Schema(
   { timestamps: true }
 );
 
-const ClientPreferences = mongoose.model(
+const ClientPreferences = mongoose.model<IClientPreferences>(
   'ClientPreferences',
   clientPreferencesSchema
 );

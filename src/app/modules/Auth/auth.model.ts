@@ -60,7 +60,7 @@ const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
       default: true,
     },
   },
-  { versionKey: false }
+  { timestamps: true, versionKey: false }
 );
 
 // Custom hooks/methods
@@ -115,7 +115,6 @@ authSchema.methods.generateRefreshToken = function () {
 authSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
-
 
 const Auth = mongoose.model<IAuth, IAuthModel>('Auth', authSchema);
 
