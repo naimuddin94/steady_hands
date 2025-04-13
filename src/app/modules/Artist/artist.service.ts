@@ -10,6 +10,7 @@ import {
   TUpdateArtistProfilePayload,
 } from './artist.validation';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
+import { ROLE } from '../Auth/auth.constant';
 
 const updateProfile = async (
   user: IAuth,

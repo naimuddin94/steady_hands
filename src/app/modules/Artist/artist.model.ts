@@ -89,7 +89,7 @@ const artistSchema = new Schema<IArtist>(
       required: false,
     },
 
-    isVerfied: {
+    isVerified: {
       type: Boolean,
       default: false,
     },
