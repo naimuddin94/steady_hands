@@ -26,7 +26,25 @@ const updatePreferences = asyncHandler(async (req, res) => {
     );
 });
 
+const updateNotificationPreferences = asyncHandler(async (req, res) => {
+  const result = await ClientService.updateNotificationPreferences(
+    req.user,
+    req.body
+  );
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result,
+        'Notification preferences updated successfully'
+      )
+    );
+});
+
 export const ClientController = {
   updateProfile,
   updatePreferences,
+  updateNotificationPreferences,
 };

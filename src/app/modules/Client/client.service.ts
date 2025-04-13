@@ -9,6 +9,7 @@ import fs from 'fs';
 import { FavoriteTattoo } from './client.constant';
 import { z } from 'zod';
 import {
+  TUpdateNotificationPayload,
   TUpdatePreferencePayload,
   TUpdateProfilePayload,
 } from './client.validation';
@@ -79,7 +80,46 @@ const updatePreferences = async (
   return preferences;
 };
 
+const updateNotificationPreferences = async (
+  user: IAuth,
+  payload: TUpdateNotificationPayload
+) => {
+  // Step 1: Find the client
+  const client = await Client.findOne({ auth: user._id });
+  if (!client) {
+    throw new AppError(status.NOT_FOUND, 'Client not found');
+  }
+
+  // Step 2: Find and update the client's notification preferences
+  const preferences = await ClientPreferences.findOneAndUpdate(
+    { clientId: client._id },
+    {
+      bookingConfirmations: payload.bookingConfirmations,
+      bookingReminders: payload.bookingReminders,
+      bookingCancellations: payload.bookingCancellations,
+      newMessageNotifications: payload.newMessageNotifications,
+      appUpdates: payload.appUpdates,
+      newAvailability: payload.newAvailability,
+      lastMinuteBookings: payload.lastMinuteBookings,
+      newGuestArtists: payload.newGuestArtists,
+      notificationChannels: payload.notificationChannels,
+    },
+    { new: true }
+  );
+
+  if (!preferences) {
+    throw new AppError(
+      status.NOT_FOUND,
+      'Preferences not found for this client'
+    );
+  }
+
+  // Return the updated preferences
+  return preferences;
+};
+
 export const ClientService = {
   updateProfile,
   updatePreferences,
+  updateNotificationPreferences,
 };

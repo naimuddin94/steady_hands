@@ -133,12 +133,33 @@ const clientPreferencesSchema = z.object({
   }),
 });
 
+const NotificationPreferencesSchema = z.object({
+  body: z.object({
+    bookingConfirmations: z.boolean().optional(),
+    bookingReminders: z.boolean().optional(),
+    bookingCancellations: z.boolean().optional(),
+    newMessageNotifications: z.boolean().optional(),
+    appUpdates: z.boolean().optional(),
+    newAvailability: z.boolean().optional(),
+    lastMinuteBookings: z.boolean().optional(),
+    newGuestArtists: z.boolean().optional(),
+    notificationChannels: z
+      .array(z.enum(['app', 'email', 'sms']))
+      .min(1, 'Please select at least one notification channel.')
+      .optional(),
+  }),
+});
+
 export type TUpdateProfilePayload = z.infer<
   typeof profileInfoSchema.shape.body
 >;
 
 export type TUpdatePreferencePayload = z.infer<
   typeof clientPreferencesSchema.shape.body
+>;
+
+export type TUpdateNotificationPayload = z.infer<
+  typeof NotificationPreferencesSchema.shape.body
 >;
 
 export const ClientValidation = {

@@ -14,10 +14,20 @@ router
     ClientController.updateProfile
   );
 
-router.route('/preferences').patch(
-  auth(ROLE.CLIENT),
-  validateRequest(ClientValidation.preferencesSchema),
-  ClientController.updatePreferences
-);
+router
+  .route('/preferences')
+  .patch(
+    auth(ROLE.CLIENT),
+    validateRequest(ClientValidation.preferencesSchema),
+    ClientController.updatePreferences
+  );
+
+router
+  .route('/notification-preferences')
+  .patch(
+    auth(ROLE.CLIENT),
+    validateRequest(ClientValidation.notificationSchema),
+    ClientController.updateNotificationPreferences
+  );
 
 export const ClientRoutes = router;
