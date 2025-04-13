@@ -96,6 +96,13 @@ const signinIntoDB = async (payload: { email: string; password: string }) => {
     throw new AppError(status.NOT_FOUND, 'User not exists!');
   }
 
+  if (user.isSocialLogin) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      'This account is registered via social login. Please sign in using your social account.'
+    );
+  }
+
   const isPasswordCorrect = await bcrypt.compare(
     payload.password,
     user.password
@@ -112,6 +119,7 @@ const signinIntoDB = async (payload: { email: string; password: string }) => {
     _id: user._id,
     fullName: user.fullName,
     email: user.email,
+    role: user.role,
     accessToken,
     refreshToken,
   };

@@ -83,6 +83,7 @@ const privacySecuritySchema = z.object({
 const profileInfoSchema = z.object({
   body: z
     .object({
+      email: z.string().email({ message: 'Invalid email format' }).optional(),
       fullName: z
         .string()
         .nonempty('Name is required')
@@ -94,11 +95,13 @@ const profileInfoSchema = z.object({
     .strict(),
 });
 
-export type TUpdateProfilePayload = z.infer<typeof profileInfoSchema.shape.body>;
+export type TUpdateProfilePayload = z.infer<
+  typeof profileInfoSchema.shape.body
+>;
 
 export const ClientValidation = {
   preferencesSchema,
   notificationSchema,
   privacySecuritySchema,
-  profileInfoSchema
+  profileInfoSchema,
 };

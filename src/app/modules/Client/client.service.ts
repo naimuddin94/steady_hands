@@ -18,18 +18,11 @@ const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
     throw new AppError(status.NOT_FOUND, 'Client not found');
   }
 
-  console.log(client);
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    await Auth.findByIdAndUpdate(
-      user._id,
-      {
-        fullName: payload.fullName,
-      },
-      { session }
-    );
+    await Auth.findByIdAndUpdate(user._id, payload, { session });
 
     const response = await Client.findOneAndUpdate(
       { auth: user._id },
