@@ -95,8 +95,50 @@ const profileInfoSchema = z.object({
     .strict(),
 });
 
+const clientPreferencesSchema = z.object({
+  body: z.object({
+    favoriteTattooStyles: z
+      .array(z.enum(Object.values(favoriteTattoos) as [string, ...string[]]))
+      .min(1, 'Please select at least one favorite tattoo style.')
+      .optional(),
+
+    favoritePiercings: z
+      .array(z.enum(Object.values(favoritePiercings) as [string, ...string[]]))
+      .min(1, 'Please select at least one favorite piercing.')
+      .optional(),
+
+    defaultHomeView: z
+      .enum(Object.values(homeViews) as [string, ...string[]])
+      .default(homeViews.BOTH)
+      .optional(),
+
+    preferredArtistType: z
+      .enum(Object.values(artistTypes) as [string, ...string[]])
+      .default(artistTypes.BOTH)
+      .optional(),
+
+    language: z.string().min(1, 'Language is required').optional(),
+
+    dateFormat: z
+      .enum(Object.values(dateFormats) as [string, ...string[]])
+      .default(dateFormats.DDMMYYYY)
+      .optional(),
+
+    notificationChannels: z
+      .array(
+        z.enum(Object.values(notificationChannel) as [string, ...string[]])
+      )
+      .min(1, 'Please select at least one notification channel.')
+      .optional(),
+  }),
+});
+
 export type TUpdateProfilePayload = z.infer<
   typeof profileInfoSchema.shape.body
+>;
+
+export type TUpdatePreferencePayload = z.infer<
+  typeof clientPreferencesSchema.shape.body
 >;
 
 export const ClientValidation = {
@@ -104,4 +146,5 @@ export const ClientValidation = {
   notificationSchema,
   privacySecuritySchema,
   profileInfoSchema,
+  clientPreferencesSchema,
 };

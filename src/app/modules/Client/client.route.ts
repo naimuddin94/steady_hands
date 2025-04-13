@@ -14,4 +14,10 @@ router
     ClientController.updateProfile
   );
 
+router.route('/preferences').patch(
+  auth(ROLE.CLIENT),
+  validateRequest(ClientValidation.preferencesSchema),
+  ClientController.updatePreferences
+);
+
 export const ClientRoutes = router;

@@ -8,7 +8,10 @@ import { TProfilePayload } from '../Auth/auth.validation';
 import fs from 'fs';
 import { FavoriteTattoo } from './client.constant';
 import { z } from 'zod';
-import { TUpdateProfilePayload } from './client.validation';
+import {
+  TUpdatePreferencePayload,
+  TUpdateProfilePayload,
+} from './client.validation';
 import Auth from '../Auth/auth.model';
 
 const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
@@ -51,33 +54,25 @@ const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
 
 const updatePreferences = async (
   user: IAuth,
-  payload: {
-    favoriteTattooStyles?: FavoriteTattoo[];
-    favoritePiercings?: string[];
-    defaultHomeView?: string;
-    preferredArtistType?: string;
-    language?: string;
-    dateFormat?: string;
-    notificationChannels?: string[];
-  }
+  payload: TUpdatePreferencePayload
 ) => {
+  // Find the client using the auth user_id
   const client = await Client.findOne({ auth: user._id });
   if (!client) {
     throw new AppError(status.NOT_FOUND, 'Client not found');
   }
 
+  // Find and update preferences, or create new ones if not found
   const preferences = await ClientPreferences.findOneAndUpdate(
-    {
-      clientId: client._id,
-    },
+    { clientId: client._id },
     payload,
-    { new: true }
+    { new: true, upsert: true }
   );
 
   if (!preferences) {
     throw new AppError(
-      status.NOT_FOUND,
-      'Preferences not found for this client'
+      status.INTERNAL_SERVER_ERROR,
+      'Error updating preferences'
     );
   }
 

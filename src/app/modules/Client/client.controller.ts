@@ -16,6 +16,17 @@ const updateProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const updatePreferences = asyncHandler(async (req, res) => {
+  const result = await ClientService.updatePreferences(req.user, req.body);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, result, 'Preferences updated successfully')
+    );
+});
+
 export const ClientController = {
   updateProfile,
+  updatePreferences,
 };
