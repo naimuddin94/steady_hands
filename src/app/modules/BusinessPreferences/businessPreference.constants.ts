@@ -18,7 +18,7 @@ export const CANCELLATION_POLICY = {
   
   export const PREFERRED_EXPERIENCE = {
     ONE_TO_THREE: '1–3 years',
-    THREE_TO_FIVE: '3–5 years',
+    THREE_TO_FIVE: '3-5 years',
     FIVE_PLUS: '5+ years',
   } as const;
   

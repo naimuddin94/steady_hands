@@ -101,18 +101,7 @@ const updateBusinessNotificationPreferences = async (
   // Step 2: Find and update the business's notification preferences
   const preferences = await BusinessPreferences.findOneAndUpdate(
     { businessId: business._id },
-    {
-      guestSpotRequests: payload.guestSpotRequests,
-      guestSpotConfirmations: payload.guestSpotConfirmations,
-      guestSpotCancellations: payload.guestSpotCancellations,
-      newEventRegistrations: payload.newEventRegistrations,
-      newMessageAlerts: payload.newMessageAlerts,
-      paymentReceivedAlerts: payload.paymentReceivedAlerts,
-      newAvailability: payload.newAvailability,
-      lastMinuteBookings: payload.lastMinuteBookings,
-      newGuestArtists: payload.newGuestArtists,
-      notificationPreferences: payload.notificationPreferences,
-    },
+    payload,
     { new: true }
   );
 
@@ -132,33 +121,28 @@ const updateBusinessSecuritySettings = async (
   user: IAuth,
   payload: TUpdateBusinessSecuritySettingsPayload
 ) => {
-  const businessPreferences = await BusinessPreferences.findOne({
-    businessId: user._id,
-  });
-
-  if (!businessPreferences) {
-    throw new AppError(status.NOT_FOUND, 'Business preferences not found');
+  // Step 1: Find the business
+  const business = await Business.findOne({ auth: user._id });
+  if (!business) {
+    throw new AppError(status.NOT_FOUND, 'Business not found');
   }
 
-  if (payload.twoFactorAuthEnabled !== undefined) {
-    businessPreferences.twoFactorAuthEnabled = payload.twoFactorAuthEnabled;
-  }
-  if (payload.hideEarnings !== undefined) {
-    businessPreferences.hideEarnings = payload.hideEarnings;
-  }
-  if (payload.manualDepositApproval !== undefined) {
-    businessPreferences.manualDepositApproval = payload.manualDepositApproval;
-  }
-  if (payload.language !== undefined) {
-    businessPreferences.language = payload.language;
-  }
-  if (payload.dateFormat !== undefined) {
-    businessPreferences.dateFormat = payload.dateFormat;
+  // Step 2: Find and update the business's notification preferences
+  const preferences = await BusinessPreferences.findOneAndUpdate(
+    { businessId: business._id },
+    payload,
+    { new: true }
+  );
+
+  if (!preferences) {
+    throw new AppError(
+      status.NOT_FOUND,
+      'Preferences not found for this business'
+    );
   }
 
-  await businessPreferences.save();
-
-  return businessPreferences;
+  // Return the updated preferences
+  return preferences;
 };
 
 export const BusinessService = {
