@@ -1,3 +1,4 @@
+import parsePhoneNumberFromString from 'libphonenumber-js';
 import { z } from 'zod';
 
 // Define the validation schemas under the "body" object for each section
@@ -58,10 +59,72 @@ export type TUpdateArtistPrivacySecurityPayload = z.infer<
   typeof artistPrivacySecuritySchema.shape.body
 >;
 
+const updateSchema = z.object({
+  body: z
+    .object({
+      // Profile Info
+      fullName: z.string().optional(),
+      email: z.string().email('Invalid email format').optional(),
+      phoneNumber: z
+        .string()
+        .refine(
+          (val) => {
+            const parsed = parsePhoneNumberFromString(val);
+            return parsed?.isValid();
+          },
+          {
+            message: 'Phone number must be a valid international format',
+          }
+        )
+        .optional(),
+      country: z.string().optional(),
+
+      // Preferences
+      showAvailability: z.boolean().optional().optional(),
+      publiclyVisibleProfile: z.boolean().optional().optional(),
+      cancellationPolicy: z.enum(['24-hour', '48-hour', '72-hour']).optional(),
+      allowDirectMessages: z.boolean(),
+      notificationPreferences: z
+        .array(z.enum(['app', 'email', 'sms']))
+        .optional(),
+      twoFactorAuthEnabled: z.boolean().optional(),
+
+      // Notifications
+      bookingRequests: z.boolean().optional(),
+      bookingConfirmations: z.boolean().optional(),
+      bookingCancellations: z.boolean().optional(),
+      eventReminders: z.boolean().optional(),
+      newMessages: z.boolean().optional(),
+      appUpdates: z.boolean().optional(),
+      newAvailability: z.boolean().optional(),
+      lastMinuteBookings: z.boolean().optional(),
+      newGuestArtists: z.boolean().optional(),
+
+      // Privacy & Security
+      language: z.string().optional(),
+      dateFormat: z.string().optional(),
+
+      // Artist-specific fields
+      artistType: z.enum(['tattoo', 'piercing', 'both']).optional(),
+      expertise: z
+        .array(z.enum(['realism', 'traditional', 'neo-traditional']))
+        .optional(),
+      studioName: z.string().optional(),
+      city: z.string().optional(),
+      location: z
+        .object({
+          longitude: z.number().min(-180).max(180),
+          latitude: z.number().min(-90).max(90),
+        })
+        .optional(),
+    })
+    .strict(),
+});
 
 export const ArtistValidation = {
   artistProfileSchema,
   artistPreferencesSchema,
   artistNotificationSchema,
   artistPrivacySecuritySchema,
+  updateSchema,
 };

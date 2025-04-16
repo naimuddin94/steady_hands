@@ -37,7 +37,7 @@ const authSchema = new mongoose.Schema<IAuth, IAuthModel>(
     role: {
       type: String,
       enum: Object.values(ROLE),
-      default: 'CLIENT',
+      default: ROLE.CLIENT,
     },
     isSocialLogin: {
       type: Boolean,

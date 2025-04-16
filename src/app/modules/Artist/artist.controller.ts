@@ -60,9 +60,29 @@ const updatePrivacySecuritySettings = asyncHandler(async (req, res) => {
     );
 });
 
+const updateArtistFlashes = asyncHandler(async (req, res) => {
+  const files = req.files as Express.Multer.File[] | undefined;
+  const result = await ArtistService.addFlashesIntoDB(req.user, files);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Flashes update successfully'));
+});
+
+const removeArtistFlash = asyncHandler(async (req, res) => {
+  const filePath = req.body.filePath;
+  const result = await ArtistService.removeFlashImage(req.user, filePath);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Flash remove successfully'));
+});
+
 export const ArtistController = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
+  updateArtistFlashes,
+  removeArtistFlash,
 };

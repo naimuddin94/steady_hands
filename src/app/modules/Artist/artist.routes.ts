@@ -3,6 +3,7 @@ import { ArtistController } from './artist.controller';
 import { auth, validateRequest } from '../../middlewares';
 import { ROLE } from '../Auth/auth.constant';
 import { ArtistValidation } from './artist.validation';
+import { upload } from '../../lib';
 
 const router = Router();
 
@@ -40,6 +41,21 @@ router
     auth(ROLE.ARTIST),
     validateRequest(ArtistValidation.artistPrivacySecuritySchema),
     ArtistController.updatePrivacySecuritySettings
+  );
+
+router
+  .route('/flashes')
+  .post(
+    auth(ROLE.ARTIST),
+    upload.array('files'),
+    ArtistController.updateArtistFlashes
+  );
+
+router
+  .route('/remove-flash')
+  .delete(
+    auth(ROLE.ARTIST),
+    ArtistController.removeArtistFlash
   );
 
 export const ArtistRoutes = router;

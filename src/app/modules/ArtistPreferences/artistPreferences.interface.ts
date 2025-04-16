@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { TNotificationChannel } from "../Client/client.constant";
 import { ConnectedAccount } from "../ClientPreferences/clientPreferences.interface";
+import { TCancellationPolicy } from "../Artist/artist.constant";
 
 export interface IArtistPreferences extends Document {
     artistId: Types.ObjectId;
@@ -11,7 +12,7 @@ export interface IArtistPreferences extends Document {
     onlineStatusVisible: boolean;
   
     // Booking Settings
-    cancellationPolicy: '24-hour' | '48-hour' | '72-hour';
+    cancellationPolicy: TCancellationPolicy;
     allowDirectMessages: boolean;
   
     // Notification Settings

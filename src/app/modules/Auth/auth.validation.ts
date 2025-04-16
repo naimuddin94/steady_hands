@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { favoriteTattoos, serviceTypes } from '../Client/client.constant';
-import { ARTIST_TYPE, expertiseTypes } from '../Artist/artist.contant';
+import { ARTIST_TYPE, expertiseTypes } from '../Artist/artist.constant';
 import { ROLE } from './auth.constant';
 import {
   OPERATING_DAYS,
@@ -159,7 +159,7 @@ const accessTokenSchema = z.object({
 
 const createSchema = z.object({
   body: z.object({
-    fulltName: z
+    fullName: z
       .string({
         required_error: 'Full name is required',
       })
@@ -396,5 +396,5 @@ export const AuthValidation = {
   createSchema,
   profileSchema,
   socialSchema,
-  forgetPasswordVerifySchema
+  forgetPasswordVerifySchema,
 };

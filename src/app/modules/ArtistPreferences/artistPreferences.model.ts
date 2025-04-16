@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { connectedAccountSchema } from '../ClientPreferences/clientPreferences.model';
-
+import { cancellationPolicy } from '../Artist/artist.constant';
+import { dateFormats, notificationChannel } from '../Client/client.constant';
 
 const artistPreferencesSchema = new Schema(
   {
@@ -19,8 +20,8 @@ const artistPreferencesSchema = new Schema(
     // Booking Settings
     cancellationPolicy: {
       type: String,
-      enum: ['24-hour', '48-hour', '72-hour'],
-      default: '24-hour',
+      enum: Object.values(cancellationPolicy),
+      default: cancellationPolicy.ONE_DAY,
     },
     allowDirectMessages: { type: Boolean, default: true },
 
@@ -38,8 +39,8 @@ const artistPreferencesSchema = new Schema(
     // Notification Channels
     notificationPreferences: {
       type: [String],
-      enum: ['app', 'email', 'sms'],
-      default: ['app'],
+      enum: Object.values(notificationChannel),
+      default: [notificationChannel.APP],
     },
 
     // Security
@@ -47,7 +48,7 @@ const artistPreferencesSchema = new Schema(
 
     // Locale
     language: { type: String, default: 'en-UK' },
-    dateFormat: { type: String, default: 'DD/MM/YYYY' },
+    dateFormat: { type: String, default: dateFormats.DDMMYYYY },
 
     // Connected Accounts
     connectedAccounts: [connectedAccountSchema],

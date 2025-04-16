@@ -10,7 +10,7 @@ import {
   TUpdateArtistProfilePayload,
 } from './artist.validation';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
-import { ROLE } from '../Auth/auth.constant';
+import fs from 'fs';
 
 const updateProfile = async (
   user: IAuth,
@@ -123,9 +123,79 @@ const updatePrivacySecuritySettings = async (
   return artistPreferences;
 };
 
+const addFlashesIntoDB = async (
+  user: IAuth,
+  files: Express.Multer.File[] | undefined
+) => {
+  const artist = await Artist.findOne({
+    auth: user._id,
+    isActive: true,
+    isDeleted: false,
+    isVerified: true,
+  });
+
+  console.log(artist);
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  if (!files || !files?.length) {
+    throw new AppError(status.BAD_REQUEST, 'Files are required');
+  }
+
+  return await Artist.findByIdAndUpdate(
+    artist._id,
+    {
+      $push: {
+        flashes: { $each: files.map((file) => file.path) },
+      },
+    },
+    { new: true }
+  );
+};
+
+const removeFlashImage = async (user: IAuth, filePath: string) => {
+  const artist = await Artist.findOne({
+    auth: user._id,
+    isActive: true,
+    isDeleted: false,
+    isVerified: true,
+  });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  // Remove the image file path from the 'flashes' array
+  const updatedArtist = await Artist.findByIdAndUpdate(
+    artist._id,
+    {
+      $pull: {
+        flashes: filePath,
+      },
+    },
+    { new: true }
+  );
+
+  if (!updatedArtist) {
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      'Failed to remove flash image'
+    );
+  }
+
+  // Check if the file exists and delete it
+  fs.unlink(filePath, () => {});
+
+  return updatedArtist;
+};
+
 export const ArtistService = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
+  addFlashesIntoDB,
+  removeFlashImage,
 };

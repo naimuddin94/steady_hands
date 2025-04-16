@@ -39,16 +39,16 @@ export type ExpertiseType =
   (typeof expertiseTypes)[keyof typeof expertiseTypes];
 
 export const ARTIST_TYPE = {
-  TATOO_ARTIST: 'Tattoo Artist',
-  PIEREER: 'Piereer',
+  TATTOO_ARTIST: 'Tattoo Artist',
+  PIERCER: 'Piercer',
 } as const;
 
 export type ValueOf<T> = T[keyof T];
 export type TArtistType = ValueOf<typeof ARTIST_TYPE>;
 export type TServices = {
-  hourly_rate: number;
-  day_rate: number;
-  consultations_fee: number;
+  hourlyRate: number;
+  dayRate: number;
+  consultationsFee: number;
 };
 
 export type TContact = {
@@ -57,4 +57,11 @@ export type TContact = {
   address: string;
 };
 
+export const cancellationPolicy = {
+  ONE_DAY: '24-hour',
+  TWO_DAY: '48-hour',
+  THREE_DAY: '72-hour',
+} as const;
 
+export type TCancellationPolicy =
+  (typeof cancellationPolicy)[keyof typeof cancellationPolicy];

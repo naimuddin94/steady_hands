@@ -4,7 +4,7 @@ import {
   TArtistType,
   TContact,
   TServices,
-} from './artist.contant';
+} from './artist.constant';
 import { locationSchema } from '../Location/location.model';
 
 export interface IArtist extends Document {
