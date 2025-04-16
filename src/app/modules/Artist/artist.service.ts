@@ -135,8 +135,6 @@ const addFlashesIntoDB = async (
     isVerified: true,
   });
 
-  console.log(artist);
-
   if (!artist) {
     throw new AppError(status.NOT_FOUND, 'Artist not found');
   }
@@ -150,6 +148,36 @@ const addFlashesIntoDB = async (
     {
       $push: {
         flashes: { $each: files.map((file) => file.path) },
+      },
+    },
+    { new: true }
+  );
+};
+
+const addPortfolioImages = async (
+  user: IAuth,
+  files: Express.Multer.File[] | undefined
+) => {
+  const artist = await Artist.findOne({
+    auth: user._id,
+    isActive: true,
+    isDeleted: false,
+    isVerified: true,
+  });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  if (!files || !files?.length) {
+    throw new AppError(status.BAD_REQUEST, 'Files are required');
+  }
+
+  return await Artist.findByIdAndUpdate(
+    artist._id,
+    {
+      $push: {
+        portfolio: { $each: files.map((file) => file.path) },
       },
     },
     { new: true }
@@ -218,6 +246,8 @@ export const ArtistService = {
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
   addFlashesIntoDB,
+  addPortfolioImages,
   removeImage,
   updateArtistPersonalInfoIntoDB,
+
 };

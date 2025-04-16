@@ -69,6 +69,15 @@ const updateArtistFlashes = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Flashes update successfully'));
 });
 
+const updateArtistPortfolio = asyncHandler(async (req, res) => {
+  const files = req.files as Express.Multer.File[] | undefined;
+  const result = await ArtistService.addPortfolioImages(req.user, files);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Flashes update successfully'));
+});
+
 const removeImage = asyncHandler(async (req, res) => {
   const filePath = req.body.filePath;
   const result = await ArtistService.removeImage(req.user, filePath);
@@ -97,4 +106,5 @@ export const ArtistController = {
   updateArtistFlashes,
   removeImage,
   updateArtistPersonalInfo,
+  updateArtistPortfolio
 };

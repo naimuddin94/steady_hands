@@ -60,6 +60,14 @@ router
   );
 
 router
+  .route('/portfolio')
+  .post(
+    auth(ROLE.ARTIST),
+    upload.array('files'),
+    ArtistController.updateArtistPortfolio
+  );
+
+router
   .route('/remove-image')
   .delete(auth(ROLE.ARTIST), ArtistController.removeImage);
 
