@@ -69,13 +69,24 @@ const updateArtistFlashes = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Flashes update successfully'));
 });
 
-const removeArtistFlash = asyncHandler(async (req, res) => {
+const removeImage = asyncHandler(async (req, res) => {
   const filePath = req.body.filePath;
-  const result = await ArtistService.removeFlashImage(req.user, filePath);
+  const result = await ArtistService.removeImage(req.user, filePath);
 
   res
     .status(status.OK)
     .json(new AppResponse(status.OK, result, 'Flash remove successfully'));
+});
+
+const updateArtistPersonalInfo = asyncHandler(async (req, res) => {
+  const result = await ArtistService.updateArtistPersonalInfoIntoDB(
+    req.user,
+    req.body
+  );
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Update profile successfully'));
 });
 
 export const ArtistController = {
@@ -84,5 +95,6 @@ export const ArtistController = {
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
   updateArtistFlashes,
-  removeArtistFlash,
+  removeImage,
+  updateArtistPersonalInfo,
 };

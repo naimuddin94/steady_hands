@@ -1,5 +1,11 @@
 import parsePhoneNumberFromString from 'libphonenumber-js';
-import { z } from 'zod';
+import { string, z } from 'zod';
+import {
+  ARTIST_TYPE,
+  cancellationPolicy,
+  expertiseTypes,
+} from './artist.constant';
+import { dateFormats, notificationChannel } from '../Client/client.constant';
 
 // Define the validation schemas under the "body" object for each section
 const artistProfileSchema = z.object({
@@ -45,20 +51,6 @@ const artistPrivacySecuritySchema = z.object({
   }),
 });
 
-// Type definitions based on the updated schemas
-export type TUpdateArtistProfilePayload = z.infer<
-  typeof artistProfileSchema.shape.body
->;
-export type TUpdateArtistPreferencesPayload = z.infer<
-  typeof artistPreferencesSchema.shape.body
->;
-export type TUpdateArtistNotificationPayload = z.infer<
-  typeof artistNotificationSchema.shape.body
->;
-export type TUpdateArtistPrivacySecurityPayload = z.infer<
-  typeof artistPrivacySecuritySchema.shape.body
->;
-
 const updateSchema = z.object({
   body: z
     .object({
@@ -78,14 +70,40 @@ const updateSchema = z.object({
         )
         .optional(),
       country: z.string().optional(),
+      contact: z
+        .object({
+          email: z.string().email('Invalid email format').optional(),
+          phone: z
+            .string()
+            .refine(
+              (val) => {
+                const parsed = parsePhoneNumberFromString(val);
+                return parsed?.isValid();
+              },
+              {
+                message: 'Phone number must be a valid international format',
+              }
+            )
+            .optional(),
+          address: z
+            .string()
+            .min(5, 'Address should be at least 5 characters long')
+            .optional(),
+        })
+        .optional(),
+      description: z.string().optional(),
 
       // Preferences
       showAvailability: z.boolean().optional().optional(),
       publiclyVisibleProfile: z.boolean().optional().optional(),
-      cancellationPolicy: z.enum(['24-hour', '48-hour', '72-hour']).optional(),
-      allowDirectMessages: z.boolean(),
+      cancellationPolicy: z
+        .enum(Object.values(cancellationPolicy) as [string, ...string[]])
+        .optional(),
+      allowDirectMessages: z.boolean().optional(),
       notificationPreferences: z
-        .array(z.enum(['app', 'email', 'sms']))
+        .array(
+          z.enum(Object.values(notificationChannel) as [string, ...string[]])
+        )
         .optional(),
       twoFactorAuthEnabled: z.boolean().optional(),
 
@@ -102,12 +120,35 @@ const updateSchema = z.object({
 
       // Privacy & Security
       language: z.string().optional(),
-      dateFormat: z.string().optional(),
+      dateFormat: z
+        .enum(Object.values(dateFormats) as [string, ...string[]])
+        .optional(),
 
       // Artist-specific fields
-      artistType: z.enum(['tattoo', 'piercing', 'both']).optional(),
+      services: z
+        .object({
+          hourlyRate: z
+            .number()
+            .min(0, { message: 'Hourly rate must be a non-negative number.' })
+            .optional(),
+          dayRate: z
+            .number()
+            .min(0, { message: 'Day rate must be a non-negative number.' })
+            .optional(),
+          consultationsFee: z
+            .number()
+            .min(0, {
+              message: 'Consultation fee must be a non-negative number.',
+            })
+            .optional(),
+        })
+        .optional(),
+
+      artistType: z
+        .enum(Object.values(ARTIST_TYPE) as [string, ...string[]])
+        .optional(),
       expertise: z
-        .array(z.enum(['realism', 'traditional', 'neo-traditional']))
+        .array(z.enum(Object.values(expertiseTypes) as [string, ...string[]]))
         .optional(),
       studioName: z.string().optional(),
       city: z.string().optional(),
@@ -128,3 +169,18 @@ export const ArtistValidation = {
   artistPrivacySecuritySchema,
   updateSchema,
 };
+
+// Type definitions based on the updated schemas
+export type TUpdateArtistProfilePayload = z.infer<
+  typeof artistProfileSchema.shape.body
+>;
+export type TUpdateArtistPreferencesPayload = z.infer<
+  typeof artistPreferencesSchema.shape.body
+>;
+export type TUpdateArtistNotificationPayload = z.infer<
+  typeof artistNotificationSchema.shape.body
+>;
+export type TUpdateArtistPrivacySecurityPayload = z.infer<
+  typeof artistPrivacySecuritySchema.shape.body
+>;
+export type TUpdateArtistPayload = z.infer<typeof updateSchema.shape.body>;

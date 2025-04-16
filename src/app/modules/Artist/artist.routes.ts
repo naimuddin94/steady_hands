@@ -9,6 +9,14 @@ const router = Router();
 
 // Route for updating artist profile
 router
+  .route('/')
+  .patch(
+    auth(ROLE.ARTIST),
+    validateRequest(ArtistValidation.updateSchema),
+    ArtistController.updateArtistPersonalInfo
+  );
+
+router
   .route('/profile')
   .patch(
     auth(ROLE.ARTIST),
@@ -52,10 +60,7 @@ router
   );
 
 router
-  .route('/remove-flash')
-  .delete(
-    auth(ROLE.ARTIST),
-    ArtistController.removeArtistFlash
-  );
+  .route('/remove-image')
+  .delete(auth(ROLE.ARTIST), ArtistController.removeImage);
 
 export const ArtistRoutes = router;

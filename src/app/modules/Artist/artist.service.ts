@@ -5,6 +5,7 @@ import status from 'http-status';
 import mongoose from 'mongoose';
 import {
   TUpdateArtistNotificationPayload,
+  TUpdateArtistPayload,
   TUpdateArtistPreferencesPayload,
   TUpdateArtistPrivacySecurityPayload,
   TUpdateArtistProfilePayload,
@@ -155,7 +156,7 @@ const addFlashesIntoDB = async (
   );
 };
 
-const removeFlashImage = async (user: IAuth, filePath: string) => {
+const removeImage = async (user: IAuth, filePath: string) => {
   const artist = await Artist.findOne({
     auth: user._id,
     isActive: true,
@@ -173,6 +174,7 @@ const removeFlashImage = async (user: IAuth, filePath: string) => {
     {
       $pull: {
         flashes: filePath,
+        portfolio: filePath,
       },
     },
     { new: true }
@@ -191,11 +193,31 @@ const removeFlashImage = async (user: IAuth, filePath: string) => {
   return updatedArtist;
 };
 
+const updateArtistPersonalInfoIntoDB = async (
+  user: IAuth,
+  payload: TUpdateArtistPayload
+) => {
+  const artist = await Artist.findOne({ auth: user._id });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  await ArtistPreferences.findOneAndUpdate({ artistId: artist._id }, payload, {
+    new: true,
+  });
+
+  return await Artist.findOneAndUpdate({ auth: user._id }, payload, {
+    new: true,
+  }).populate('preferences');
+};
+
 export const ArtistService = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
   addFlashesIntoDB,
-  removeFlashImage,
+  removeImage,
+  updateArtistPersonalInfoIntoDB,
 };
