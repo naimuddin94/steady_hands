@@ -184,3 +184,5 @@ export type TUpdateArtistPrivacySecurityPayload = z.infer<
   typeof artistPrivacySecuritySchema.shape.body
 >;
 export type TUpdateArtistPayload = z.infer<typeof updateSchema.shape.body>;
+
+

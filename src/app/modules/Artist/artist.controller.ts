@@ -98,6 +98,14 @@ const updateArtistPersonalInfo = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Update profile successfully'));
 });
 
+const saveAvailability = asyncHandler(async (req, res) => {
+  const result = await ArtistService.saveAvailabilityIntoDB(req.body);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Save availability successfully'));
+});
+
 export const ArtistController = {
   updateProfile,
   updatePreferences,
@@ -106,5 +114,6 @@ export const ArtistController = {
   updateArtistFlashes,
   removeImage,
   updateArtistPersonalInfo,
-  updateArtistPortfolio
+  updateArtistPortfolio,
+  saveAvailability,
 };

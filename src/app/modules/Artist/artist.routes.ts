@@ -4,6 +4,7 @@ import { auth, validateRequest } from '../../middlewares';
 import { ROLE } from '../Auth/auth.constant';
 import { ArtistValidation } from './artist.validation';
 import { upload } from '../../lib';
+import { SlotValidation } from '../../schema/slotValidation';
 
 const router = Router();
 
@@ -70,5 +71,13 @@ router
 router
   .route('/remove-image')
   .delete(auth(ROLE.ARTIST), ArtistController.removeImage);
+
+router
+  .route('/availability')
+  .put(
+    auth(ROLE.ARTIST),
+    validateRequest(SlotValidation.createSchema),
+    ArtistController.saveAvailability
+  );
 
 export const ArtistRoutes = router;

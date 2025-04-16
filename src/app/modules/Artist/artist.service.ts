@@ -12,6 +12,7 @@ import {
 } from './artist.validation';
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import fs from 'fs';
+import { TAvailability } from '../../schema/slotValidation';
 
 const updateProfile = async (
   user: IAuth,
@@ -240,6 +241,10 @@ const updateArtistPersonalInfoIntoDB = async (
   }).populate('preferences');
 };
 
+const saveAvailabilityIntoDB = async (payload: TAvailability) => {
+  console.log(payload);
+};
+
 export const ArtistService = {
   updateProfile,
   updatePreferences,
@@ -249,5 +254,5 @@ export const ArtistService = {
   addPortfolioImages,
   removeImage,
   updateArtistPersonalInfoIntoDB,
-
+  saveAvailabilityIntoDB,
 };
