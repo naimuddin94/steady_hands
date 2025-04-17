@@ -63,5 +63,15 @@ export const cancellationPolicy = {
   THREE_DAY: '72-hour',
 } as const;
 
+export const days = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const;
+
 export type TCancellationPolicy =
   (typeof cancellationPolicy)[keyof typeof cancellationPolicy];

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { days } from '../modules/Artist/artist.constant';
 
 // Helper function to validate time format and convert to minutes for comparison
 const timeFormat = /^\d{2}:\d{2}$/;
@@ -37,7 +38,8 @@ const hasOverlap = (slots: { start: string; end: string }[]) => {
 
       // Check if slot1 overlaps with slot2
       if (
-        (slot1.startInMinutes < slot2.endInMinutes && slot1.endInMinutes > slot2.startInMinutes)
+        slot1.startInMinutes < slot2.endInMinutes &&
+        slot1.endInMinutes > slot2.startInMinutes
       ) {
         return true;
       }
@@ -53,28 +55,33 @@ const convertToMinutes = (time: string) => {
   return hour * 60 + minute;
 };
 
+// Check time valid range
+const isValidTimeRange = (time: string) => {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+};
+
 // Zod validation schema
 const createSchema = z.object({
   body: z.object({
-    day: z.enum([
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ]),
+    day: z.enum(days),
     slots: z
       .array(
         z
           .object({
             start: z
               .string()
-              .regex(timeFormat, 'Start time must be in HH:MM format'),
+              .regex(timeFormat, 'Start time must be in HH:MM format')
+              .refine(isValidTimeRange, {
+                message:
+                  'Start time must be a valid time within 00:00 to 23:59',
+              }),
             end: z
               .string()
-              .regex(timeFormat, 'End time must be in HH:MM format'),
+              .regex(timeFormat, 'End time must be in HH:MM format')
+              .refine(isValidTimeRange, {
+                message: 'End time must be a valid time within 00:00 to 23:59',
+              }),
           })
           .refine((data) => validateTimeSlot(data.start, data.end), {
             message: 'End time must be later than start time',
