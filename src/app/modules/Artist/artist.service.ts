@@ -259,8 +259,6 @@ export const saveAvailabilityIntoDB = async (
     splitIntoHourlySlots(slot.start, slot.end)
   );
 
-  console.log({ hourlySlots });
-
   // Step 2: Deduplicate within request
   const uniqueSlots = removeDuplicateSlots(hourlySlots);
 

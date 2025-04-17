@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, Document } from 'mongoose';
 import { TWeekDay } from '../Artist/artist.constant';
 
 export interface IAvailabilitySlot {
@@ -6,8 +6,8 @@ export interface IAvailabilitySlot {
   end: string; // Format: 'HH:MM'
 }
 
-export interface IArtistAvailability {
-  _id?: Types.ObjectId;
+export interface ISlot extends Document {
+  auth: Types.ObjectId;
   artist: Types.ObjectId;
   day: TWeekDay;
   slots: IAvailabilitySlot[];
