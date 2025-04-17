@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { days } from '../modules/Artist/artist.constant';
+import { WEEK_DAYS } from '../modules/Artist/artist.constant';
 
 // Helper function to validate time format and convert to minutes for comparison
 const timeFormat = /^\d{2}:\d{2}$/;
@@ -64,7 +64,7 @@ const isValidTimeRange = (time: string) => {
 // Zod validation schema
 const createSchema = z.object({
   body: z.object({
-    day: z.enum(days),
+    day: z.enum(WEEK_DAYS),
     slots: z
       .array(
         z

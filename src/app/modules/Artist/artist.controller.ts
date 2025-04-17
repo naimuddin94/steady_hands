@@ -99,7 +99,7 @@ const updateArtistPersonalInfo = asyncHandler(async (req, res) => {
 });
 
 const saveAvailability = asyncHandler(async (req, res) => {
-  const result = await ArtistService.saveAvailabilityIntoDB(req.body);
+  const result = await ArtistService.saveAvailabilityIntoDB(req.user, req.body);
 
   res
     .status(status.OK)

@@ -13,6 +13,13 @@ import {
 import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import fs from 'fs';
 import { TAvailability } from '../../schema/slotValidation';
+import Slot from '../Slot/slot.model';
+import {
+  hasOverlap,
+  removeDuplicateSlots,
+  splitIntoHourlySlots,
+  toMinutes,
+} from '../Slot/slot.utils';
 
 const updateProfile = async (
   user: IAuth,
@@ -241,8 +248,54 @@ const updateArtistPersonalInfoIntoDB = async (
   }).populate('preferences');
 };
 
-const saveAvailabilityIntoDB = async (payload: TAvailability) => {
-  console.log(payload);
+export const saveAvailabilityIntoDB = async (
+  user: IAuth,
+  payload: TAvailability
+) => {
+  const { day, slots } = payload;
+
+  // Step 1: Normalize into 1-hour blocks
+  const hourlySlots = slots.flatMap((slot) =>
+    splitIntoHourlySlots(slot.start, slot.end)
+  );
+
+  console.log({ hourlySlots });
+
+  // Step 2: Deduplicate within request
+  const uniqueSlots = removeDuplicateSlots(hourlySlots);
+
+  // Step 3: Fetch existing slots for that day
+  const existing = await Slot.findOne({ user: user._id, day });
+
+  if (existing) {
+    const existingSlots = existing.slots;
+
+    // Step 4: Check overlap
+    if (hasOverlap(existingSlots, uniqueSlots)) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        'New slots overlap with existing slots'
+      );
+    }
+
+    // Step 5: Merge, dedupe, and sort
+    const merged = removeDuplicateSlots([
+      ...existingSlots,
+      ...uniqueSlots,
+    ]).sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
+
+    // Step 6: Save
+    existing.set('slots', merged);
+    await existing.save();
+    return existing;
+  } else {
+    // First time adding slots
+    return await Slot.create({
+      user: user._id,
+      day,
+      slots: uniqueSlots,
+    });
+  }
 };
 
 export const ArtistService = {
