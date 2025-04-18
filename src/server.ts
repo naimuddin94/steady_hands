@@ -13,19 +13,22 @@ import mongoose from 'mongoose';
 import app from './app';
 import config from './app/config';
 import seedingAdmin from './app/utils/seeding';
+import { Logger } from './app/utils';
 
 let server: Server;
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+  Logger.error('Uncaught Exception:', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (error) => {
   console.error('Unhandled Rejection:', error);
   if (server) {
-    server.close(() => {
+    server.close((error) => {
       console.error('Server closed due to unhandled rejection');
+      Logger.error('Server closed due to unhandled rejection', error);
       process.exit(1);
     });
   } else {
@@ -41,8 +44,9 @@ async function bootstrap() {
     server = app.listen(config.port, () => {
       console.log(`🚀 Application is running on port ${config.port}`);
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to connect to database:', err);
+    Logger.error('Failed to connect to database:', err);
     process.exit(1);
   }
 }
@@ -52,8 +56,9 @@ bootstrap();
 process.on('SIGTERM', () => {
   console.log('SIGTERM received');
   if (server) {
-    server.close(() => {
+    server.close((error) => {
       console.log('Server closed due to SIGTERM');
+      Logger.error('Server closed due to SIGTERM', error);
       process.exit(0);
     });
   } else {
@@ -64,8 +69,9 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
   console.log('SIGINT received');
   if (server) {
-    server.close(() => {
+    server.close((error) => {
       console.log('Server closed due to SIGINT');
+      Logger.error('Server closed due to SIGINT', error);
       process.exit(0);
     });
   } else {
