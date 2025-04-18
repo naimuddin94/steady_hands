@@ -3,6 +3,7 @@ import { AuthRoutes } from '../modules/Auth/auth.route';
 import { ClientRoutes } from '../modules/Client/client.route';
 import { ArtistRoutes } from '../modules/Artist/artist.routes';
 import { BusinessRoutes } from '../modules/Business/business.routes';
+import { BookingRoutes } from '../modules/Booking/booking.route';
 
 const router = Router();
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: '/business',
     route: BusinessRoutes,
+  },
+  {
+    path: '/bookings',
+    route: BookingRoutes,
   },
 ];
 

@@ -1,7 +1,7 @@
 import { Types, Document } from 'mongoose';
 import { TWeekDay } from '../Artist/artist.constant';
 
-export interface IAvailabilitySlot {
+export interface IAvailabilitySlot extends Document {
   start: string; // Format: 'HH:MM'
   end: string; // Format: 'HH:MM'
 }
