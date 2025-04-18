@@ -263,7 +263,9 @@ export const saveAvailabilityIntoDB = async (
   const uniqueSlots = removeDuplicateSlots(hourlySlots);
 
   // Step 3: Fetch existing slots for that day
-  const existing = await Slot.findOne({ user: user._id, day });
+  const existing = await Slot.findOne({ auth: user._id, day });
+
+  console.log({ existing });
 
   if (existing) {
     const existingSlots = existing.slots;
@@ -289,7 +291,7 @@ export const saveAvailabilityIntoDB = async (
   } else {
     // First time adding slots
     return await Slot.create({
-      user: user._id,
+      auth: user._id,
       day,
       slots: uniqueSlots,
     });
