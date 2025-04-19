@@ -1,18 +1,47 @@
-import { FilterQuery } from 'mongoose';
+import status from 'http-status';
+import { AppError } from '../../utils';
 import Folder from '../Folder/folder.model';
-import { IFolder } from '../Folder/folder.interface';
+import fs from 'fs';
+import Artist from '../Artist/artist.model';
 
-const getArtistFolders = async (params: string) => {
-  const query: FilterQuery<IFolder> = {};
-  if (params === 'pending') {
-    query.isPublished = false;
-  } else if (params === 'published') {
-    query.isPublished = true;
+const getArtistFolders = async () => {
+  return await Folder.find({ isPublished: false });
+};
+
+const changeStatusOnFolder = async (folderId: string, permission: boolean) => {
+  const folder = await Folder.findById(folderId);
+
+  if (!folder) {
+    throw new AppError(status.NOT_FOUND, 'Folder not found');
   }
 
-  return await Folder.find(query);
+  const artist = await Artist.findOne({ auth: folder.auth });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  if (permission) {
+    if (folder.for === 'portfolio') {
+      await Artist.findByIdAndUpdate(artist?._id, {
+        $addToSet: {
+          portfolio: {
+            folder: folder._id,
+            position: artist?.portfolio?.length + 1,
+          },
+        },
+      });
+      return await Folder.findByIdAndUpdate(folderId, {
+        isPublished: true,
+      });
+    }
+  } else {
+    const deletedFolder = await Folder.findByIdAndDelete(folderId);
+    deletedFolder?.images?.forEach((path) => fs.unlink(path, () => {}));
+  }
 };
 
 export const AdminService = {
   getArtistFolders,
+  changeStatusOnFolder,
 };

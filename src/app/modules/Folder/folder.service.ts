@@ -3,6 +3,7 @@ import { IAuth } from '../Auth/auth.interface';
 import status from 'http-status';
 import Folder from './folder.model';
 import { TFolderPayload } from './folder.validation';
+import fs from 'fs';
 
 const saveFolderIntoDB = async (
   user: IAuth,
@@ -16,6 +17,7 @@ const saveFolderIntoDB = async (
   const folder = await Folder.findOne({ name: payload.name, auth: user._id });
 
   if (folder) {
+    files?.forEach((file) => fs.unlink(file.path, () => {}));
     throw new AppError(status.BAD_REQUEST, 'Folder name already exists!');
   }
 

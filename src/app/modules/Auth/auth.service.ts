@@ -20,7 +20,6 @@ import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 import Business from '../Business/business.model';
 import BusinessPreferences from '../BusinessPreferences/businessPreferences.model';
 import { z } from 'zod';
-import { IClientPreferences } from '../ClientPreferences/clientPreferences.interface';
 
 const createAuth = async (payload: IAuth) => {
   const existingUser = await Auth.findOne({ email: payload.email });

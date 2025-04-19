@@ -2,6 +2,7 @@ import mongoose, { Schema, model } from 'mongoose';
 import { IArtist } from './artist.interface';
 import { expertiseTypes, ARTIST_TYPE } from './artist.constant';
 import { locationSchema } from '../Location/location.model';
+import { number } from 'zod';
 
 // 🔹 Subschema: Contact
 const contactSchema = new Schema(
@@ -19,6 +20,19 @@ const servicesSchema = new Schema(
     hourlyRate: { type: Number, default: 0 },
     dayRate: { type: Number, default: 0 },
     consultationsFee: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
+// 🔹 Subschema: Portfolio
+const portfolioSchema = new Schema(
+  {
+    folder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Folder',
+      required: true,
+    },
+    position: { type: Number, default: 0 },
   },
   { _id: false }
 );
@@ -105,13 +119,13 @@ const artistSchema = new Schema<IArtist>(
     },
     flashes: [
       {
-        type: String,
+        type: portfolioSchema,
         required: true,
       },
     ],
     portfolio: [
       {
-        type: String,
+        type: portfolioSchema,
         required: true,
       },
     ],
