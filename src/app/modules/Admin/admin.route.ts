@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { auth } from '../../middlewares';
+import { ROLE } from '../Auth/auth.constant';
+import { AdminController } from './admin.controller';
+
+const router = Router();
+
+router
+  .route('/folders')
+  .get(
+    //! auth(ROLE.SUPER_ADMIN, ROLE.ADMIN), 
+    AdminController.getFolders
+);
+
+export const AdminRoutes = router;
