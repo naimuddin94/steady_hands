@@ -20,7 +20,17 @@ const changeStatusOnFolder = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Action is successful on folder'));
 });
 
+const verifiedArtistByAdmin = asyncHandler(async (req, res) => {
+  const artistId = req.params.artistId;
+  const result = await AdminService.verifiedArtistByAdminIntoDB(artistId);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Artist verified successfully'));
+});
+
 export const AdminController = {
   getFolders,
-  changeStatusOnFolder
+  changeStatusOnFolder,
+  verifiedArtistByAdmin,
 };

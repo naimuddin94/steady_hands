@@ -7,7 +7,7 @@ export interface IAuth extends Document {
   fullName?: string;
   phoneNumber: string;
   password: string;
-  fcmToken: string | null;
+  fcmToken?: string | null;
   image?: string;
   role: TRole;
   isSocialLogin: boolean;

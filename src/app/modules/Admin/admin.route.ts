@@ -15,4 +15,9 @@ router.route('/folders/:id').patch(
   AdminController.changeStatusOnFolder
 );
 
+router.route('/verified-artist/:artistId').patch(
+  //! auth(ROLE.SUPER_ADMIN, ROLE.ADMIN),
+  AdminController.verifiedArtistByAdmin
+);
+
 export const AdminRoutes = router;

@@ -41,7 +41,22 @@ const changeStatusOnFolder = async (folderId: string, permission: boolean) => {
   }
 };
 
+const verifiedArtistByAdminIntoDB = async (artistId: string) => {
+  const result = await Artist.findByIdAndUpdate(
+    artistId,
+    { isVerified: true },
+    { new: true }
+  );
+
+  if (!result) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  return result;
+};
+
 export const AdminService = {
   getArtistFolders,
   changeStatusOnFolder,
+  verifiedArtistByAdminIntoDB,
 };
