@@ -106,6 +106,16 @@ const saveAvailability = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Save availability successfully'));
 });
 
+const fetchAllArtists = asyncHandler(async (req, res) => {
+  const { data, meta } = await ArtistService.fetchAllArtistsFromDB(req.query);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, data, 'Artists retrieved successfully', meta)
+    );
+});
+
 export const ArtistController = {
   updateProfile,
   updatePreferences,
@@ -116,4 +126,5 @@ export const ArtistController = {
   updateArtistPersonalInfo,
   updateArtistPortfolio,
   saveAvailability,
+  fetchAllArtists,
 };

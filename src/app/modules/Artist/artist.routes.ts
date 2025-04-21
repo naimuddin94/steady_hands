@@ -15,7 +15,8 @@ router
     auth(ROLE.ARTIST),
     validateRequest(ArtistValidation.updateSchema),
     ArtistController.updateArtistPersonalInfo
-  );
+  )
+  .get(ArtistController.fetchAllArtists);
 
 router
   .route('/profile')

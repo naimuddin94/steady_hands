@@ -20,6 +20,7 @@ import {
   splitIntoHourlySlots,
   toMinutes,
 } from '../Slot/slot.utils';
+import QueryBuilder from '../../builders/QueryBuilder';
 
 const updateProfile = async (
   user: IAuth,
@@ -298,6 +299,36 @@ export const saveAvailabilityIntoDB = async (
   }
 };
 
+const fetchAllArtistsFromDB = async (query: Record<string, unknown>) => {
+  const artistsQuery = new QueryBuilder(
+    Artist.find({
+      isActive: true,
+      isDeleted: false,
+      isVerified: true,
+    }).populate([
+      {
+        path: 'auth',
+        select: 'fullName image phoneNumber',
+      },
+      {
+        path: 'portfolio.folder',
+        select: 'name images createdAt',
+      },
+    ]),
+    query
+  )
+    .search([])
+    .fields()
+    .filter()
+    .paginate()
+    .sort();
+
+  const data = await artistsQuery.modelQuery;
+  const meta = await artistsQuery.countTotal();
+
+  return { data, meta };
+};
+
 export const ArtistService = {
   updateProfile,
   updatePreferences,
@@ -308,4 +339,5 @@ export const ArtistService = {
   removeImage,
   updateArtistPersonalInfoIntoDB,
   saveAvailabilityIntoDB,
+  fetchAllArtistsFromDB,
 };
