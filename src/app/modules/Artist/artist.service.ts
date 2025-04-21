@@ -329,6 +329,84 @@ const fetchAllArtistsFromDB = async (query: Record<string, unknown>) => {
   return { data, meta };
 };
 
+// For availability
+const updateAvailability = async (user: IAuth, data: any) => {
+  // Find the artist
+  const artist = await Artist.findOne({ auth: user._id });
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  // Update availability slots
+  const slots = data.slots; // This would be an array of time slots
+  // Assuming you store the time slots in the artist schema or in a related collection
+  await Slot.updateMany(
+    { auth: artist.auth },
+    { $set: { slots } } // Update the slots for the artist
+  );
+
+  return artist;
+};
+
+const updateTimeOff = async (user: IAuth, payload: { dates: string[] }) => {
+  // Handle time-off (if needed, set blocked dates, etc.)
+  // Assuming time off is stored as an array of dates that are blocked
+
+  const artist = await Artist.findOne({ auth: user._id });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  // Convert the string dates in the payload to Date objects
+  const newDates = payload.dates.map((date) => new Date(date));
+
+  // Validate the payload dates to ensure they are in the future
+  newDates.forEach((date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to midnight for accurate comparison
+
+    if (today > date) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        'Selected date cannot be in the past. Please choose a future date.'
+      );
+    }
+  });
+
+  // Get the current date and set the time to midnight to ignore the time part
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0); // Set to midnight for correct comparison
+  const currentDateString = currentDate.toISOString(); // Convert to ISO string for accurate comparison
+
+  // Remove past dates from timeOff
+  await Artist.updateOne(
+    { _id: artist._id },
+    {
+      $pull: {
+        timeOff: { $lt: currentDateString }, // Remove past dates from timeOff
+      },
+    }
+  );
+
+  // Add the time-off dates
+  const result = await Artist.updateOne(
+    { _id: artist._id },
+    {
+      $addToSet: {
+        timeOff: { $each: newDates.map((date) => date.toISOString()) }, // Add new dates without duplicates
+      },
+    }
+  );
+
+  if (result.modifiedCount === 0) {
+    throw new AppError(status.INTERNAL_SERVER_ERROR, 'Failed to update time off');
+  }
+
+  const updatedArtist = await Artist.findById(artist._id);
+  return updatedArtist;
+};
+
 export const ArtistService = {
   updateProfile,
   updatePreferences,
@@ -340,4 +418,6 @@ export const ArtistService = {
   updateArtistPersonalInfoIntoDB,
   saveAvailabilityIntoDB,
   fetchAllArtistsFromDB,
+  updateAvailability,
+  updateTimeOff,
 };

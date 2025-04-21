@@ -44,4 +44,6 @@ export interface IBusiness extends Document {
   guestSpots?: Types.ObjectId[];
   events?: Types.ObjectId[];
   residentArtists?: Types.ObjectId[];
+
+  timeOff: Date[],
 }

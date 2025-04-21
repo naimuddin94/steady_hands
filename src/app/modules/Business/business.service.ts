@@ -145,9 +145,43 @@ const updateBusinessSecuritySettings = async (
   return preferences;
 };
 
+const updateGuestSpots = async (user: IAuth, data: any) => {
+  // Find the business
+  const business = await Business.findOne({ auth: user._id });
+  if (!business) {
+    throw new AppError(status.NOT_FOUND, 'Business not found');
+  }
+
+  // Update guest spots logic
+  const guestSpots = data.guestSpots; // This would be the guest spots to be added/updated
+  // Assuming guest spots are an array of available spots for a business
+  // business.guestSpots.push(...guestSpots);
+  await business.save();
+
+  return business;
+};
+
+const updateTimeOff = async (user: IAuth, data: any) => {
+  // Handle time-off for business (if needed)
+  // Assuming time-off is stored as blocked dates for a business
+
+  const business = await Business.findOne({ auth: user._id });
+  if (!business) {
+    throw new AppError(status.NOT_FOUND, 'Business not found');
+  }
+
+  // Add the time-off logic
+  business.timeOff.push(data.date);
+  await business.save();
+
+  return business;
+};
+
 export const BusinessService = {
   updateBusinessProfile,
   updateBusinessPreferences,
   updateBusinessNotificationPreferences,
   updateBusinessSecuritySettings,
+  updateGuestSpots,
+  updateTimeOff,
 };

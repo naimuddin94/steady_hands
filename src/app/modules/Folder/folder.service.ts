@@ -4,6 +4,7 @@ import status from 'http-status';
 import Folder from './folder.model';
 import { TFolderPayload } from './folder.validation';
 import fs from 'fs';
+import Artist from '../Artist/artist.model';
 
 const saveFolderIntoDB = async (
   user: IAuth,
@@ -28,6 +29,32 @@ const saveFolderIntoDB = async (
   });
 };
 
+const removeFolderFromDB = async (folderId: string) => {
+  const folder = await Folder.findByIdAndDelete(folderId);
+
+  if (!folder) {
+    throw new AppError(status.NOT_FOUND, 'Folder not exists');
+  }
+
+  const artist = await Artist.findOne({ auth: folder.auth });
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  return await Artist.findByIdAndUpdate(
+    artist._id,
+    {
+      $pull: {
+        portfolio: { folder: folderId },
+        flashes: { folder: folderId },
+      },
+    },
+    { new: true }
+  );
+};
+
 export const FolderService = {
   saveFolderIntoDB,
+  removeFolderFromDB,
 };

@@ -27,4 +27,5 @@ export interface IArtist extends Document {
   flashes: Types.ObjectId[];
   portfolio: Types.ObjectId[];
   preferences?: Types.ObjectId;
+  timeOff: Date[],
 }

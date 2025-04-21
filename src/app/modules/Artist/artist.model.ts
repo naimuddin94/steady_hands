@@ -134,6 +134,7 @@ const artistSchema = new Schema<IArtist>(
       ref: 'ArtistPreferences',
       required: false,
     },
+    timeOff: [{ type: Date }],
   },
   {
     timestamps: true,

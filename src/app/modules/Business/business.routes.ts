@@ -38,4 +38,13 @@ router
     BusinessController.updateBusinessSecuritySettings
   );
 
+// Route to block new dates manually for a business
+router
+  .route('/time-off')
+  .patch(
+    auth(ROLE.BUSINESS),
+    validateRequest(BusinessValidation.timeOffSchema),
+    BusinessController.updateTimeOff
+  );
+
 export const BusinessRoutes = router;

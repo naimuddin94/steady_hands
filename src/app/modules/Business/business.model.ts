@@ -5,6 +5,7 @@ import {
   SERVICES_OFFERED,
 } from './business.constants';
 import { locationSchema } from '../Location/location.model';
+import { IBusiness } from './business.interface';
 
 const timeRangeSchema = new Schema(
   {
@@ -22,7 +23,7 @@ const contactSchema = new Schema(
   { _id: false }
 );
 
-const businessSchema = new Schema(
+const businessSchema = new Schema<IBusiness>(
   {
     auth: {
       type: Schema.Types.ObjectId,
@@ -75,6 +76,7 @@ const businessSchema = new Schema(
     guestSpots: [{ type: Schema.Types.ObjectId, ref: 'GuestSpot' }],
     events: [{ type: Schema.Types.ObjectId, ref: 'Event' }],
     residentArtists: [{ type: Schema.Types.ObjectId, ref: 'Artist' }],
+    timeOff: [{ type: Date }],
   },
   {
     timestamps: true,
@@ -82,6 +84,6 @@ const businessSchema = new Schema(
   }
 );
 
-const Business = mongoose.model('Business', businessSchema);
+const Business = mongoose.model<IBusiness>('Business', businessSchema);
 
 export default Business;

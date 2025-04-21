@@ -81,4 +81,22 @@ router
     ArtistController.saveAvailability
   );
 
+// Route to manage artist's weekly availability
+router
+  .route('/availability')
+  .patch(
+    auth(ROLE.ARTIST),
+    validateRequest(ArtistValidation.availabilitySchema),
+    ArtistController.updateAvailability
+  );
+
+// Route to manage artist's manually booked hours
+router
+  .route('/time-off')
+  .patch(
+    auth(ROLE.ARTIST),
+    validateRequest(ArtistValidation.timeOffSchema),
+    ArtistController.updateTimeOff
+  );
+
 export const ArtistRoutes = router;
