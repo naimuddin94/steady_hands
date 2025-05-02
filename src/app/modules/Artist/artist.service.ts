@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Artist from './artist.model';
 import { IAuth } from '../Auth/auth.interface';
 import { AppError } from '../../utils';
@@ -45,7 +47,7 @@ const updateProfile = async (
     await session.commitTransaction();
     session.endSession();
     return updatedArtist;
-  } catch (error) {
+  } catch {
     await session.abortTransaction();
     session.endSession();
     throw new AppError(
@@ -266,8 +268,6 @@ export const saveAvailabilityIntoDB = async (
   // Step 3: Fetch existing slots for that day
   const existing = await Slot.findOne({ auth: user._id, day });
 
-  console.log({ existing });
-
   if (existing) {
     const existingSlots = existing.slots;
 
@@ -400,11 +400,30 @@ const updateTimeOff = async (user: IAuth, payload: { dates: string[] }) => {
   );
 
   if (result.modifiedCount === 0) {
-    throw new AppError(status.INTERNAL_SERVER_ERROR, 'Failed to update time off');
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      'Failed to update time off'
+    );
   }
 
   const updatedArtist = await Artist.findById(artist._id);
   return updatedArtist;
+};
+
+const getAvailabilityExcludingTimeOff = async (artistId: string) => {
+  const artist = await Artist.findById(artistId);
+
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  const availableSlots = await Slot.find({ auth: artist.auth }).select(
+    'day slots'
+  );
+
+  const offDay = artist.timeOff;
+
+  return { availableSlots, offDay };
 };
 
 export const ArtistService = {
@@ -420,4 +439,5 @@ export const ArtistService = {
   fetchAllArtistsFromDB,
   updateAvailability,
   updateTimeOff,
+  getAvailabilityExcludingTimeOff,
 };

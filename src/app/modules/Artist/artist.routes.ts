@@ -83,12 +83,8 @@ router
 
 // Route to manage artist's weekly availability
 router
-  .route('/availability')
-  .patch(
-    auth(ROLE.ARTIST),
-    validateRequest(ArtistValidation.availabilitySchema),
-    ArtistController.updateAvailability
-  );
+  .route('/availability/:id')
+  .get(ArtistController.getAvailabilityExcludingTimeOff)
 
 // Route to manage artist's manually booked hours
 router

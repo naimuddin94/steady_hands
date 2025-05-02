@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import status from 'http-status';
 import { AppResponse, asyncHandler } from '../../utils';
 import { ArtistService } from './artist.service';
@@ -133,6 +134,17 @@ const updateTimeOff = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Time off updated successfully'));
 });
 
+const getAvailabilityExcludingTimeOff = asyncHandler(async (req, res) => {
+  const artistId = req.params.id;
+  const result = await ArtistService.getAvailabilityExcludingTimeOff(artistId);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, result, 'Availability retrieved successfully')
+    );
+});
+
 export const ArtistController = {
   updateProfile,
   updatePreferences,
@@ -146,4 +158,5 @@ export const ArtistController = {
   fetchAllArtists,
   updateAvailability,
   updateTimeOff,
+  getAvailabilityExcludingTimeOff,
 };

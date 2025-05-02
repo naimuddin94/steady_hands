@@ -2,7 +2,6 @@ import mongoose, { Schema, model } from 'mongoose';
 import { IArtist } from './artist.interface';
 import { expertiseTypes, ARTIST_TYPE } from './artist.constant';
 import { locationSchema } from '../Location/location.model';
-import { number } from 'zod';
 
 // 🔹 Subschema: Contact
 const contactSchema = new Schema(
