@@ -8,9 +8,6 @@ const objectIdPattern = /^[0-9a-fA-F]{24}$/;
 // Booking validation schema
 const bookingSchema = z.object({
   body: z.object({
-    artist: z
-      .string({ required_error: 'Artist ID is required' })
-      .regex(objectIdPattern, 'Invalid artist ID format'),
     service: z.string({ required_error: 'Service is required' }),
     serviceType: z.string({ required_error: 'Service type is required' }),
     bodyLocation: z.string({ required_error: 'Body location is required' }),
