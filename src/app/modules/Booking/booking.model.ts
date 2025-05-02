@@ -22,6 +22,14 @@ const bookingSchema = new Schema<IBooking>(
       type: String,
       required: true,
     },
+    paymentIntentId: {
+      type: String,
+      required: true,
+    },
+    transactionId: {
+      type: String,
+      required: true,
+    },
     slot: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Slot',
@@ -32,6 +40,26 @@ const bookingSchema = new Schema<IBooking>(
       type: String,
       enum: Object.values(BOOKING_STATUS),
       default: 'pending',
+    },
+    service: {
+      type: String,
+      required: true,
+    },
+    serviceType: {
+      type: String,
+      required: true,
+    },
+    bodyLocation: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    referralImage: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }

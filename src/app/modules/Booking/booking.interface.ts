@@ -5,8 +5,15 @@ import { TBookingStatus } from './booking.constant';
 export interface IBooking extends Document {
   artist: Types.ObjectId;
   user: Types.ObjectId;
+  service: string;
+  serviceType: string;
+  bodyLocation: string;
+  description: string;
+  referralImage?: string;
   date: Date;
   day: TWeekDay;
+  paymentIntentId?: string;
+  transactionId?: string; 
   slot: Types.ObjectId;
   status: TBookingStatus;
   createdAt?: Date;
