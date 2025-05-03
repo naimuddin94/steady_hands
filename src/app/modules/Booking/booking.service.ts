@@ -52,7 +52,7 @@ const createBooking = async (
     artist: artist._id,
     user: user._id,
     date,
-    slot: slotId,
+    slotTimeId: slotId,
   });
 
   if (existingBooking) {

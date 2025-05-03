@@ -136,7 +136,13 @@ const updateTimeOff = asyncHandler(async (req, res) => {
 
 const getAvailabilityExcludingTimeOff = asyncHandler(async (req, res) => {
   const artistId = req.params.id;
-  const result = await ArtistService.getAvailabilityExcludingTimeOff(artistId);
+  const month = Number(req.query.month);
+  const year = Number(req.query.year);
+  const result = await ArtistService.getAvailabilityExcludingTimeOff(
+    artistId,
+    month,
+    year
+  );
 
   res
     .status(status.OK)

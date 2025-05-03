@@ -4,7 +4,7 @@ import Artist from './artist.model';
 import { IAuth } from '../Auth/auth.interface';
 import { AppError } from '../../utils';
 import status from 'http-status';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import {
   TUpdateArtistNotificationPayload,
   TUpdateArtistPayload,
@@ -23,6 +23,8 @@ import {
   toMinutes,
 } from '../Slot/slot.utils';
 import QueryBuilder from '../../builders/QueryBuilder';
+import Booking from '../Booking/booking.model';
+import moment from 'moment';
 
 const updateProfile = async (
   user: IAuth,
@@ -410,20 +412,106 @@ const updateTimeOff = async (user: IAuth, payload: { dates: string[] }) => {
   return updatedArtist;
 };
 
-const getAvailabilityExcludingTimeOff = async (artistId: string) => {
+// const getAvailabilityExcludingTimeOff = async (artistId: string) => {
+//   const artist = await Artist.findById(artistId);
+
+//   if (!artist) {
+//     throw new AppError(status.NOT_FOUND, 'Artist not found');
+//   }
+
+//   const availableSlots = await Slot.find({ auth: artist.auth }).select(
+//     'day slots'
+//   );
+
+//   const offDay = artist.timeOff;
+
+//   const totalDays = new Date(
+//     new Date().getFullYear(),
+//     5, // this is dynamic data from frontend
+//     0
+//   ).getDate();
+
+//   const bookingData = await Booking.find({
+//     artist: artist._id,
+//     date: { $gt: new Date() },
+//     status: { $ne: 'cancelled' },
+//   });
+
+//   console.log(bookingData);
+
+//   return { availableSlots, offDay, bookingData };
+// };
+
+const getAvailabilityExcludingTimeOff = async (
+  artistId: string,
+  month: number,
+  year: number
+) => {
   const artist = await Artist.findById(artistId);
 
   if (!artist) {
     throw new AppError(status.NOT_FOUND, 'Artist not found');
   }
 
+  // Fetch the available slots for the artist
   const availableSlots = await Slot.find({ auth: artist.auth }).select(
     'day slots'
   );
 
-  const offDay = artist.timeOff;
+  // Fetch the artist's time off (days when they are not available)
+  const offDay = artist.timeOff.map((off) => moment(off).format('YYYY-MM-DD'));
 
-  return { availableSlots, offDay };
+  // Get the total days for the given month and year
+
+  const totalDays = new Date(
+    new Date().getFullYear(),
+    month, // this is dynamic data from frontend
+    0
+  ).getDate();
+
+  // Fetch booking data for the artist for upcoming dates
+  const bookingData = await Booking.find({
+    artist: artist._id,
+    date: { $gt: new Date() },
+    status: { $ne: 'cancelled' },
+  }).populate('slot');
+
+  // Generate the calendar data by iterating through each day of the month
+  const calendarData = [];
+
+  for (let day = 1; day <= totalDays; day++) {
+    const currentDate = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD'); // The current date in the loop
+    const dayName = currentDate.format('dddd'); // Name of the day (e.g., Monday, Tuesday)
+
+    // Check if this day is a time off day for the artist
+    const isOffDay = offDay.includes(currentDate.format('YYYY-MM-DD'));
+
+    // Get the available slots for this day
+    const availableSlotsForDay =
+      availableSlots.find((slot) => slot.day === dayName)?.slots || [];
+
+    // Exclude booked slots for this day
+    const availableTimeSlots = availableSlotsForDay.filter((slot) => {
+      return !bookingData.some((booking) => {
+        // Check if the booking is on the same day and if the slot time matches
+        return (
+          moment(booking.date).isSame(currentDate, 'day') &&
+          booking.slotTimeId.toString() === (slot._id as ObjectId).toString()
+        );
+      });
+    });
+
+    // Add the data for this day to the calendar data
+    calendarData.push({
+      date: currentDate.format('YYYY-MM-DD'),
+      dayName,
+      availableSlots: isOffDay ? [] : availableTimeSlots, // If it's an off day, no available slots
+      isUnavailable: isOffDay || availableTimeSlots.length === 0, // If it's an off day or no available slots, mark it as unavailable
+    });
+  }
+
+  // Return the calendar data
+  return { calendarData };
 };
 
 export const ArtistService = {
