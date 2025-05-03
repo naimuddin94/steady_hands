@@ -13,8 +13,9 @@ export interface IBooking extends Document {
   date: Date;
   day: TWeekDay;
   paymentIntentId?: string;
-  transactionId?: string; 
+  transactionId?: string;
   slot: Types.ObjectId;
+  slotTimeId: Types.ObjectId;
   status: TBookingStatus;
   createdAt?: Date;
   updatedAt?: Date;

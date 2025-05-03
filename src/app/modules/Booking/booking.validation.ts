@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import { WEEK_DAYS } from '../Artist/artist.constant';
-import { BOOKING_STATUS } from './booking.constant';
 
 // MongoDB ObjectId regex
 const objectIdPattern = /^[0-9a-fA-F]{24}$/;
@@ -25,20 +23,12 @@ const bookingSchema = z.object({
         return date;
       }),
 
-    day: z.enum(WEEK_DAYS, {
-      required_error: 'Day is required and must be valid weekday',
-    }),
-
     slotId: z
       .string({ required_error: 'Slot ID is required' })
       .regex(objectIdPattern, 'Invalid slot ID format'),
 
     paymentIntentId: z.string().optional(),
     transactionId: z.string().optional(),
-
-    status: z
-      .enum([...Object.values(BOOKING_STATUS)] as [string, ...string[]])
-      .optional(),
   }),
 });
 

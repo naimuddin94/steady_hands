@@ -1,55 +1,109 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
 import Booking from './booking.model';
 import Slot from '../Slot/slot.model';
 import { IAuth } from '../Auth/auth.interface';
 import { AppError } from '../../utils';
 import status from 'http-status';
-import mongoose, { Types } from 'mongoose';
-import { BOOKING_STATUS } from './booking.constant';
+import { Types } from 'mongoose';
 import { TBookingData } from './booking.validation';
+import Artist from '../Artist/artist.model';
 
 // Create a new booking
-const createBooking = async (user: IAuth, payload: TBookingData) => {
-  const { slotId, date } = payload;
+const createBooking = async (
+  user: IAuth,
+  payload: TBookingData,
+  file: Express.Multer.File | undefined
+) => {
+  const {
+    slotId,
+    date,
+    service,
+    serviceType,
+    description,
+    paymentIntentId,
+    bodyLocation,
+    transactionId,
+  } = payload;
   // Check if the selected slot exists and is available
-  const slot = await Slot.findOne({ 'slots._id': slotId });
+  const existSlot = await Slot.findOne({ 'slots._id': slotId });
 
-  if (!slot) {
+  if (!existSlot) {
     throw new AppError(status.NOT_FOUND, 'Slot not available on this day');
   }
 
-  const findSlot = slot.slots.find(
+  const findSlot = existSlot.slots.find(
     (item) => (item._id as Types.ObjectId).toString() === slotId
   );
 
-  console.log({ slot, findSlot, date, user });
+  if (!findSlot) {
+    throw new AppError(status.NOT_FOUND, 'Slot not found');
+  }
 
-  // // Check if the booking already exists for the same user and artist at this slot
-  // const existingBooking = await Booking.findOne({
-  //   artist: artistId,
-  //   user: user._id,
-  //   date,
-  //   slot: slotId,
-  // });
-  // if (existingBooking) {
-  //   throw new AppError(
-  //     status.BAD_REQUEST,
-  //     'You have already booked for this time slot'
-  //   );
-  // }
+  const artist = await Artist.findOne({ auth: existSlot.auth });
 
-  // // Create the booking
-  // const booking = new Booking({
-  //   artist: artistId,
-  //   user: user._id,
-  //   date,
-  //   day: slot.day,
-  //   slot: slotId,
-  //   status: BOOKING_STATUS.PENDING,
-  // });
+  if (!artist) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
 
-  // // Save the booking
-  // await booking.save();
-  // return booking;
+  // Check if the booking already exists for the same user and artist at this slot
+  const existingBooking = await Booking.findOne({
+    artist: artist._id,
+    user: user._id,
+    date,
+    slot: slotId,
+  });
+
+  if (existingBooking) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      'You have already booked for this time slot'
+    );
+  }
+
+  let referralImage = null;
+
+  // if referral image
+  if (file) {
+    referralImage = file.path;
+  }
+
+  // Create the booking
+  const booking = await Booking.create({
+    artist: artist._id,
+    user: user._id,
+    date,
+    day: existSlot.day,
+    paymentIntentId,
+    transactionId,
+    slot: existSlot._id,
+    slotTimeId: findSlot._id,
+    service,
+    serviceType,
+    bodyLocation,
+    description,
+    referralImage,
+  });
+
+  const result = await Booking.findById(booking._id).populate('slot');
+
+  if (!result) {
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      'Something went wrong saving booking into DB'
+    );
+  }
+
+  const { slot, slotTimeId, ...remainData } = result?.toObject() as any;
+
+  return {
+    slot: slot?.slots?.find(
+      //@ts-ignore
+      (item) => item._id?.toString() === slotTimeId?.toString()
+    ),
+    ...remainData,
+  };
 };
 
 // // Get all bookings for a user (client)

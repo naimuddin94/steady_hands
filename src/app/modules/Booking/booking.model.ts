@@ -35,6 +35,10 @@ const bookingSchema = new Schema<IBooking>(
       ref: 'Slot',
       required: true,
     },
+    slotTimeId: {
+      type: mongoose.Schema.Types.ObjectId, // specific subdocument in slots[]
+      required: true,
+    },
 
     status: {
       type: String,
