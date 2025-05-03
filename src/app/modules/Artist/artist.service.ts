@@ -253,10 +253,7 @@ const updateArtistPersonalInfoIntoDB = async (
   }).populate('preferences');
 };
 
-export const saveAvailabilityIntoDB = async (
-  user: IAuth,
-  payload: TAvailability
-) => {
+const saveAvailabilityIntoDB = async (user: IAuth, payload: TAvailability) => {
   const { day, slots } = payload;
 
   // Step 1: Normalize into 1-hour blocks
@@ -411,36 +408,6 @@ const updateTimeOff = async (user: IAuth, payload: { dates: string[] }) => {
   const updatedArtist = await Artist.findById(artist._id);
   return updatedArtist;
 };
-
-// const getAvailabilityExcludingTimeOff = async (artistId: string) => {
-//   const artist = await Artist.findById(artistId);
-
-//   if (!artist) {
-//     throw new AppError(status.NOT_FOUND, 'Artist not found');
-//   }
-
-//   const availableSlots = await Slot.find({ auth: artist.auth }).select(
-//     'day slots'
-//   );
-
-//   const offDay = artist.timeOff;
-
-//   const totalDays = new Date(
-//     new Date().getFullYear(),
-//     5, // this is dynamic data from frontend
-//     0
-//   ).getDate();
-
-//   const bookingData = await Booking.find({
-//     artist: artist._id,
-//     date: { $gt: new Date() },
-//     status: { $ne: 'cancelled' },
-//   });
-
-//   console.log(bookingData);
-
-//   return { availableSlots, offDay, bookingData };
-// };
 
 const getAvailabilityExcludingTimeOff = async (
   artistId: string,
