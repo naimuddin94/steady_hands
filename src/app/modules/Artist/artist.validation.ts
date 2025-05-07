@@ -1,5 +1,5 @@
 import parsePhoneNumberFromString from 'libphonenumber-js';
-import { string, z } from 'zod';
+import { z } from 'zod';
 import {
   ARTIST_TYPE,
   cancellationPolicy,
@@ -164,18 +164,22 @@ const updateSchema = z.object({
 
 const availabilitySchema = z.object({
   body: z.object({
-    slots: z.array(
-      z.object({
-        start: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
-        end: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
-      })
-    ).nonempty('At least one time slot is required'),
+    slots: z
+      .array(
+        z.object({
+          start: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
+          end: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
+        })
+      )
+      .nonempty('At least one time slot is required'),
   }),
 });
 
 const timeOffSchema = z.object({
   body: z.object({
-    dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')),
+    dates: z.array(
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
+    ),
   }),
 });
 
@@ -186,7 +190,7 @@ export const ArtistValidation = {
   artistPrivacySecuritySchema,
   updateSchema,
   availabilitySchema,
-  timeOffSchema
+  timeOffSchema,
 };
 
 // Type definitions based on the updated schemas
@@ -203,5 +207,3 @@ export type TUpdateArtistPrivacySecurityPayload = z.infer<
   typeof artistPrivacySecuritySchema.shape.body
 >;
 export type TUpdateArtistPayload = z.infer<typeof updateSchema.shape.body>;
-
-

@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types , Document} from "mongoose";
 import { TNotificationChannel } from "../Client/client.constant";
 import { ConnectedAccount } from "../ClientPreferences/clientPreferences.interface";
 import { TCancellationPolicy } from "../Artist/artist.constant";
