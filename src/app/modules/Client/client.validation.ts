@@ -180,5 +180,6 @@ export const ClientValidation = {
   privacySecuritySchema,
   profileInfoSchema,
   clientPreferencesSchema,
-  securitySettingsSchema
+  securitySettingsSchema,
+  NotificationPreferencesSchema,
 };

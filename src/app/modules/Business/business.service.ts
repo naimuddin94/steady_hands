@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Business from './business.model';
 import { IAuth } from '../Auth/auth.interface';
 import { AppError } from '../../utils';
@@ -49,7 +50,7 @@ const updateBusinessProfile = async (
     session.endSession();
 
     return updatedBusiness;
-  } catch (error) {
+  } catch {
     await session.abortTransaction();
     session.endSession();
     throw new AppError(
@@ -153,9 +154,9 @@ const updateGuestSpots = async (user: IAuth, data: any) => {
   }
 
   // Update guest spots logic
-  const guestSpots = data.guestSpots; // This would be the guest spots to be added/updated
-  // Assuming guest spots are an array of available spots for a business
-  // business.guestSpots.push(...guestSpots);
+  const guestSpots = data.guestSpots;
+  console.log({ guestSpots });
+
   await business.save();
 
   return business;
@@ -177,6 +178,10 @@ const updateTimeOff = async (user: IAuth, data: any) => {
   return business;
 };
 
+const requestToJoinArtist = async (user: IAuth, artistId: string) => {
+  console.log(user, artistId);
+};
+
 export const BusinessService = {
   updateBusinessProfile,
   updateBusinessPreferences,
@@ -184,4 +189,5 @@ export const BusinessService = {
   updateBusinessSecuritySettings,
   updateGuestSpots,
   updateTimeOff,
+  requestToJoinArtist,
 };

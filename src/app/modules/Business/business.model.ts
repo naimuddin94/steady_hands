@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import {
   BUSINESS_TYPE,
-  OPERATING_DAYS,
   SERVICES_OFFERED,
 } from './business.constants';
 import { locationSchema } from '../Location/location.model';
