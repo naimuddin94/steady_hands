@@ -6,6 +6,7 @@ import { BusinessRoutes } from '../modules/Business/business.routes';
 import { BookingRoutes } from '../modules/Booking/booking.route';
 import { FolderRoutes } from '../modules/Folder/folder.route';
 import { AdminRoutes } from '../modules/Admin/admin.route';
+import { RequestRoute } from '../modules/Request/request.route';
 
 const router = Router();
 
@@ -37,6 +38,10 @@ const moduleRoutes = [
   {
     path: '/folders',
     route: FolderRoutes,
+  },
+  {
+    path: '/requests',
+    route: RequestRoute,
   },
 ];
 
