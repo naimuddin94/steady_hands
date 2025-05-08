@@ -178,8 +178,18 @@ const updateTimeOff = async (user: IAuth, data: any) => {
   return business;
 };
 
-const requestToJoinArtist = async (user: IAuth, artistId: string) => {
-  console.log(user, artistId);
+const removeArtistFromDB = async (user: IAuth, artistId: string) => {
+  const business = await Business.findOne({ auth: user._id });
+
+  if (!business) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found!');
+  }
+
+  return await Business.findByIdAndUpdate(
+    business._id,
+    { $pull: { residentArtists: artistId } },
+    { new: true }
+  );
 };
 
 export const BusinessService = {
@@ -189,5 +199,5 @@ export const BusinessService = {
   updateBusinessSecuritySettings,
   updateGuestSpots,
   updateTimeOff,
-  requestToJoinArtist,
+  removeArtistFromDB,
 };

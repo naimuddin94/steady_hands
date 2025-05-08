@@ -47,4 +47,8 @@ router
     BusinessController.updateTimeOff
   );
 
+router
+  .route('/resident-artist/:artistId')
+  .delete(BusinessController.removeArtist);
+
 export const BusinessRoutes = router;

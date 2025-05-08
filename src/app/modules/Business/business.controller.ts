@@ -70,15 +70,31 @@ const updateBusinessSecuritySettings = asyncHandler(async (req, res) => {
     );
 });
 
-const updateAvailability = asyncHandler(async(req, res)=>{
+const updateAvailability = asyncHandler(async (req, res) => {
   const result = await BusinessService.updateGuestSpots(req.user, req.body);
-    res.status(status.OK).json(new AppResponse(status.OK, result, 'Guest spots updated successfully'));
-})
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, result, 'Guest spots updated successfully')
+    );
+});
 
-const updateTimeOff = asyncHandler(async(req, res)=>{
+const updateTimeOff = asyncHandler(async (req, res) => {
   const result = await BusinessService.updateTimeOff(req.user, req.body);
-    res.status(status.OK).json(new AppResponse(status.OK, result, 'Time off updated successfully'));
-})
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Time off updated successfully'));
+});
+
+const removeArtist = asyncHandler(async (req, res) => {
+  const result = await BusinessService.removeArtistFromDB(
+    req.user,
+    req.params.artistId
+  );
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Artist remove successfully'));
+});
 
 export const BusinessController = {
   updateBusinessProfile,
@@ -86,5 +102,6 @@ export const BusinessController = {
   updateBusinessNotificationPreferences,
   updateBusinessSecuritySettings,
   updateAvailability,
-  updateTimeOff
+  updateTimeOff,
+  removeArtist,
 };

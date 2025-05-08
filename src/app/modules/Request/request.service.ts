@@ -58,9 +58,15 @@ const fetchRequestByArtist = async (user: IAuth) => {
 };
 
 const acceptRequestFromArtist = async (user: IAuth, requestId: string) => {
+  const artist = await Artist.findOne({ auth: user._id });
+
+  if (!artist) {
+    throw new AppError(status.OK, 'Artist not found');
+  }
+
   const request = await RequestModel.findOne({
     _id: requestId,
-    artistId: user._id,
+    artistId: artist._id,
   });
 
   if (!request) {
