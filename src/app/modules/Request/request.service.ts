@@ -30,7 +30,28 @@ const createRequestIntoDB = async (user: IAuth, artistId: string) => {
 };
 
 const fetchRequestByArtist = async (user: IAuth) => {
-  const requests = await RequestModel.find({ artistId: user._id });
+  const requests = await RequestModel.find({
+    $or: [{ artistId: user._id }, { businessId: user._id }],
+  }).populate([
+    {
+      path: 'artistId',
+      select: '',
+      populate: {
+        path: 'auth',
+        model: 'Auth',
+        select: 'fullName email image',
+      },
+    },
+    {
+      path: 'businessId',
+      select: '',
+      populate: {
+        path: 'auth',
+        model: 'Auth',
+        select: 'fullName email image',
+      },
+    },
+  ]);
   return requests;
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import { IAuth, IAuthModel } from './auth.interface';
 import { ROLE } from './auth.constant';

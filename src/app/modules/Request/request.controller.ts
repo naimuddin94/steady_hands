@@ -15,7 +15,7 @@ const createRequest = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.CREATED, result, 'Request send successfully'));
 });
 
-const fetchRequestByArtist = asyncHandler(async (req, res) => {
+const fetchPendingRequests = asyncHandler(async (req, res) => {
   const result = await RequestService.fetchRequestByArtist(req.user);
 
   // Send the response
@@ -28,5 +28,5 @@ const fetchRequestByArtist = asyncHandler(async (req, res) => {
 
 export const RequestController = {
   createRequest,
-  fetchRequestByArtist,
+  fetchPendingRequests,
 };
