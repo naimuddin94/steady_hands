@@ -8,7 +8,7 @@ import Artist from '../Artist/artist.model';
 const createRequestIntoDB = async (user: IAuth, artistId: string) => {
   // Step 1: Find the business
   const business = await Business.findOne({ auth: user._id });
-  
+
   if (!business) {
     throw new AppError(status.NOT_FOUND, 'Business not found');
   }
@@ -29,6 +29,12 @@ const createRequestIntoDB = async (user: IAuth, artistId: string) => {
   return request;
 };
 
+const fetchRequestByArtist = async (user: IAuth) => {
+  const requests = await RequestModel.find({ artistId: user._id });
+  return requests;
+};
+
 export const RequestService = {
   createRequestIntoDB,
+  fetchRequestByArtist,
 };
