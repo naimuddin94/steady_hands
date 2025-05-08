@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from 'http-status';
 import { AppError } from '../../utils';
 import Business from '../Business/business.model';
 import { IAuth } from './../Auth/auth.interface';
 import RequestModel from './request.model';
 import Artist from '../Artist/artist.model';
+import mongoose from 'mongoose';
 
 const createRequestIntoDB = async (user: IAuth, artistId: string) => {
   // Step 1: Find the business
@@ -55,7 +57,57 @@ const fetchRequestByArtist = async (user: IAuth) => {
   return requests;
 };
 
+const acceptRequestFromArtist = async (user: IAuth, requestId: string) => {
+  const request = await RequestModel.findOne({
+    _id: requestId,
+    artistId: user._id,
+  });
+
+  if (!request) {
+    throw new AppError(status.OK, 'Request not found');
+  }
+
+  const business = await Business.findById(request.businessId);
+
+  if (!business) {
+    throw new AppError(status.OK, 'Business not found');
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    await Business.findByIdAndUpdate(
+      business._id,
+      {
+        $addToSet: { residentArtists: request.artistId },
+      },
+      { session }
+    );
+
+    await RequestModel.findByIdAndDelete(request._id, { session });
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return null;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      `Something went wrong when accept request: ${error?.message}`
+    );
+  }
+};
+
+const removeRequest = async (requestId: string) => {
+  return await RequestModel.findByIdAndDelete(requestId);
+};
+
 export const RequestService = {
   createRequestIntoDB,
   fetchRequestByArtist,
+  acceptRequestFromArtist,
+  removeRequest,
 };
