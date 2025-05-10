@@ -593,6 +593,19 @@ const fetchProfileFromDB = async (user: IAuth) => {
     }).select('-artistId -updatedAt -createdAt -__v');
 
     return { ...artist?.toObject(), preference };
+  } else if (user?.role === ROLE.BUSINESS) {
+    const business = await Business.findOne({ auth: user._id }).populate([
+      {
+        path: 'auth',
+        select: 'fullName image email phoneNumber isProfile',
+      },
+    ]);
+
+    const preference = await BusinessPreferences.findOne({
+      businessId: business?._id,
+    }).select('-businessId -updatedAt -createdAt -__v');
+
+    return { ...business?.toObject(), preference };
   }
 };
 
