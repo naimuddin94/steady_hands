@@ -11,6 +11,8 @@ import {
   TUpdateSecuritySettingsPayload,
 } from './client.validation';
 import Auth from '../Auth/auth.model';
+import Artist from '../Artist/artist.model';
+import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 
 const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
   const client = await Client.findOne({ auth: user._id });
@@ -134,8 +136,7 @@ const updatePrivacySecuritySettings = async (
     clientPreferences.personalizedContent = payload.personalizedContent;
   }
   if (payload.locationSuggestions !== undefined) {
-    clientPreferences.locationSuggestions =
-      payload.locationSuggestions;
+    clientPreferences.locationSuggestions = payload.locationSuggestions;
   }
 
   await clientPreferences.save();
@@ -143,11 +144,86 @@ const updatePrivacySecuritySettings = async (
   return clientPreferences;
 };
 
+const fetchDiscoverArtistFromDB = async (
+  user: IAuth,
+  query: Record<string, unknown>
+) => {
+  const client = await Client.findOne({ auth: user._id });
 
+  if (!client) {
+    throw new AppError(status.NOT_FOUND, 'Client not found');
+  }
+
+  const preference = await ClientPreferences.findOne({ clientId: client?._id });
+
+  // const artists = await Artist.find({
+  //   isActive: true,
+  //   isDeleted: false,
+  //   isVerified: true,
+  // }).populate([
+  //   {
+  //     path: 'auth',
+  //     select: 'fullName image email phoneNumber isProfile',
+  //   },
+  // ]);
+
+  // Assuming you have geospatial data in the "location" field of the artist model
+  const artists = await Artist.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [90.4125, 23.8103], // client's location
+        },
+        distanceField: 'distance', // The field to store the distance
+        maxDistance: client.radius * 1000, // Convert radius to meters
+        spherical: true, // Use spherical geometry for distance calculations
+      },
+    },
+    {
+      $match: {
+        isActive: true,
+        isDeleted: false,
+        isVerified: true,
+      },
+    },
+    {
+      $lookup: {
+        from: 'clients', // Assuming the artists have a client reference
+        localField: 'auth',
+        foreignField: '_id',
+        as: 'authDetails',
+      },
+    },
+    {
+      $unwind: '$authDetails', // Unwind the authDetails array to access the fields directly
+    },
+    {
+      $project: {
+        _id: 1,
+        type: 1,
+        city: 1,
+        profileViews: 1,
+        isVerified: 1,
+        distance: 1, // Include distance in the response
+        'authDetails.fullName': 1,
+        'authDetails.image': 1,
+        'authDetails.email': 1,
+        'authDetails.phoneNumber': 1,
+        'authDetails.isProfile': 1,
+      },
+    },
+  ]);
+
+  const artistPreference = await ArtistPreferences.find({});
+
+  console.log({ client, preference, query, artists, artistPreference });
+};
 
 export const ClientService = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
+  fetchDiscoverArtistFromDB,
 };

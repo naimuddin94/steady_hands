@@ -60,9 +60,27 @@ const updatePrivacySecuritySettings = asyncHandler(async (req, res) => {
     );
 });
 
+const fetchDiscoverArtists = asyncHandler(async (req, res) => {
+  const result = await ClientService.fetchDiscoverArtistFromDB(
+    req.user,
+    req.query
+  );
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result,
+        'Discover artists retrieved successfully'
+      )
+    );
+});
+
 export const ClientController = {
   updateProfile,
   updatePreferences,
   updateNotificationPreferences,
   updatePrivacySecuritySettings,
+  fetchDiscoverArtists,
 };

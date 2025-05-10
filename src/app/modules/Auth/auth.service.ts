@@ -599,6 +599,14 @@ const fetchProfileFromDB = async (user: IAuth) => {
         path: 'auth',
         select: 'fullName image email phoneNumber isProfile',
       },
+      {
+        path: 'residentArtists',
+        select: 'auth',
+        populate: {
+          path: 'auth',
+          select: 'fullName image email phoneNumber isProfile',
+        },
+      },
     ]);
 
     const preference = await BusinessPreferences.findOne({

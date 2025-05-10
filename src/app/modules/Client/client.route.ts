@@ -38,4 +38,8 @@ router
     ClientController.updatePrivacySecuritySettings
   );
 
+router
+  .route('/discover')
+  .get(auth(ROLE.CLIENT), ClientController.fetchDiscoverArtists);
+
 export const ClientRoutes = router;
