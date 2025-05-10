@@ -575,9 +575,24 @@ const fetchProfileFromDB = async (user: IAuth) => {
       },
     ]);
 
-    const preference = await ClientPreferences.findOne({ clientId: client?._id }).select("-clientId -updatedAt -createdAt -__v");
+    const preference = await ClientPreferences.findOne({
+      clientId: client?._id,
+    }).select('-clientId -updatedAt -createdAt -__v');
 
     return { ...client?.toObject(), preference };
+  } else if (user?.role === ROLE.ARTIST) {
+    const artist = await Artist.findOne({ auth: user._id }).populate([
+      {
+        path: 'auth',
+        select: 'fullName image email phoneNumber isProfile',
+      },
+    ]);
+
+    const preference = await ArtistPreferences.findOne({
+      artistId: artist?._id,
+    }).select('-artistId -updatedAt -createdAt -__v');
+
+    return { ...artist?.toObject(), preference };
   }
 };
 
