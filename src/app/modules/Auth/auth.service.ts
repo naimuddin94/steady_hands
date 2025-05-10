@@ -5,7 +5,7 @@ import { generateOtp, verifyToken } from '../../lib';
 import sendOtpSms from '../../utils/sendOtpSms';
 import { IAuth } from './auth.interface';
 import config from '../../config';
-import { AppError, sendOtpEmail } from '../../utils';
+import { AppError, Logger, sendOtpEmail } from '../../utils';
 import status from 'http-status';
 import Auth from './auth.model';
 import { AuthValidation, TProfilePayload } from './auth.validation';
@@ -431,8 +431,8 @@ const updateProfilePhoto = async (
   if (user?.image) {
     try {
       await fs.promises.unlink(user.image);
-    } catch (error) {
-      console.error('Error deleting old file:', error);
+    } catch (error: unknown) {
+      Logger.error('Error deleting old file:', error);
     }
   }
 
@@ -566,6 +566,21 @@ const resetPasswordIntoDB = async (
   return null;
 };
 
+const fetchProfileFromDB = async (user: IAuth) => {
+  if (user?.role === ROLE.CLIENT) {
+    const client = await Client.findOne({ auth: user._id }).populate([
+      {
+        path: 'auth',
+        select: 'fullName image email phoneNumber isProfile',
+      },
+    ]);
+
+    const preference = await ClientPreferences.findOne({ clientId: client?._id }).select("-clientId -updatedAt -createdAt -__v");
+
+    return { ...client?.toObject(), preference };
+  }
+};
+
 export const AuthService = {
   createAuth,
   saveAuthIntoDB,
@@ -578,4 +593,5 @@ export const AuthService = {
   forgotPassword,
   verifyOtpForForgetPassword,
   resetPasswordIntoDB,
+  fetchProfileFromDB,
 };

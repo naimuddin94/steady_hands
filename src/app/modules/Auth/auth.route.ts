@@ -79,4 +79,6 @@ router
   .route('/profile-image')
   .put(auth(), upload.single('file'), AuthController.updateProfilePhoto);
 
+router.route('/profile').get(auth(), AuthController.fetchProfile);
+
 export const AuthRoutes = router;

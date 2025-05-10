@@ -131,6 +131,16 @@ const resetPassword = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Reset password successfully'));
 });
 
+const fetchProfile = asyncHandler(async (req, res) => {
+  const result = await AuthService.fetchProfileFromDB(req.user);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(status.OK, result, 'Profile data retrieved successfully')
+    );
+});
+
 export const AuthController = {
   createAuth,
   saveAuthData,
@@ -143,4 +153,5 @@ export const AuthController = {
   forgetPassword,
   verifyOtpForForgetPassword,
   resetPassword,
+  fetchProfile,
 };

@@ -143,6 +143,8 @@ const updatePrivacySecuritySettings = async (
   return clientPreferences;
 };
 
+
+
 export const ClientService = {
   updateProfile,
   updatePreferences,
