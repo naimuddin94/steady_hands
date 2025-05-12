@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import ClientPreferences from '../ClientPreferences/clientPreferences.model';
 import Client from './client.model';
 import { IAuth } from '../Auth/auth.interface';
@@ -12,7 +13,6 @@ import {
 } from './client.validation';
 import Auth from '../Auth/auth.model';
 import Artist from '../Artist/artist.model';
-import ArtistPreferences from '../ArtistPreferences/artistPreferences.model';
 
 const updateProfile = async (user: IAuth, payload: TUpdateProfilePayload) => {
   const client = await Client.findOne({ auth: user._id });
@@ -148,76 +148,97 @@ const fetchDiscoverArtistFromDB = async (
   user: IAuth,
   query: Record<string, unknown>
 ) => {
+  // Fetch the client data
   const client = await Client.findOne({ auth: user._id });
 
   if (!client) {
     throw new AppError(status.NOT_FOUND, 'Client not found');
   }
 
-  const preference = await ClientPreferences.findOne({ clientId: client?._id });
+  // Define the earth radius in kilometers (6378.1 km) - This is useful for understanding the scale
 
-  // const artists = await Artist.find({
-  //   isActive: true,
-  //   isDeleted: false,
-  //   isVerified: true,
-  // }).populate([
-  //   {
-  //     path: 'auth',
-  //     select: 'fullName image email phoneNumber isProfile',
-  //   },
-  // ]);
+  const longitude = client.location.coordinates[0]; // Client longitude
+  const latitude = client.location.coordinates[1]; // Client latitude
+  const radius = client.radius; // Client's search radius (in kilometers)
 
-  // Assuming you have geospatial data in the "location" field of the artist model
+  // Check if 'query.type' is provided. If not, fetch all types.
+  let artistTypeFilter = {};
+  if (typeof query?.type === 'string') {
+    // Case-insensitive match using regex if type is provided
+    artistTypeFilter = {
+      type: {
+        $regex: new RegExp(query?.type, 'i'), // 'i' for case-insensitive search
+      },
+    };
+  }
+
+  // Aggregation query to find artists within the specified radius
   const artists = await Artist.aggregate([
     {
       $geoNear: {
         near: {
           type: 'Point',
-          coordinates: [90.4125, 23.8103], // client's location
+          coordinates: [longitude, latitude], // Client's location [longitude, latitude]
         },
-        distanceField: 'distance', // The field to store the distance
-        maxDistance: client.radius * 1000, // Convert radius to meters
-        spherical: true, // Use spherical geometry for distance calculations
+        distanceField: 'distance', // Add the distance to each artist document
+        maxDistance: radius * 1000, // Convert radius to meters (radius is in kilometers, so multiply by 1000)
+        spherical: true, // Use spherical geometry to calculate distance accurately
       },
     },
     {
       $match: {
-        isActive: true,
-        isDeleted: false,
-        isVerified: true,
+        isActive: true, // Match active artists
+        isDeleted: false, // Exclude deleted artists
+        isVerified: true, // Optionally, filter only verified artists
+        ...artistTypeFilter,
       },
     },
     {
       $lookup: {
-        from: 'clients', // Assuming the artists have a client reference
+        from: 'auths',
         localField: 'auth',
         foreignField: '_id',
-        as: 'authDetails',
+        as: 'auth',
       },
     },
     {
-      $unwind: '$authDetails', // Unwind the authDetails array to access the fields directly
-    },
-    {
-      $project: {
-        _id: 1,
-        type: 1,
-        city: 1,
-        profileViews: 1,
-        isVerified: 1,
-        distance: 1, // Include distance in the response
-        'authDetails.fullName': 1,
-        'authDetails.image': 1,
-        'authDetails.email': 1,
-        'authDetails.phoneNumber': 1,
-        'authDetails.isProfile': 1,
+      $unwind: {
+        path: '$auth',
+        preserveNullAndEmptyArrays: true,
       },
     },
+    {
+      $lookup: {
+        from: 'artistpreferences',
+        localField: '_id',
+        foreignField: 'artistId',
+        as: 'preferencesDetails',
+      },
+    },
+    {
+      $unwind: {
+        path: '$preferencesDetails',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    // {
+    //   $project: {
+    //     _id: 1,
+    //     type: 1,
+    //     city: 1,
+    //     profileViews: 1,
+    //     location: 1,
+    //     distance: 1,
+    //     'auth._id': 1,
+    //     'auth.fullName': 1,
+    //     'auth.email': 1,
+    //     'auth.phoneNumber': 1,
+    //     'auth.image': 1,
+    //   },
+    // },
   ]);
 
-  const artistPreference = await ArtistPreferences.find({});
-
-  console.log({ client, preference, query, artists, artistPreference });
+  return artists;
 };
 
 export const ClientService = {
