@@ -1,5 +1,5 @@
 import mongoose, { Document } from 'mongoose';
-import { locationSchema } from '../Location/location.model';
+// import { locationSchema } from '../Location/location.model';
 import {
   ArtistType,
   DateFormat,
@@ -7,12 +7,11 @@ import {
   FavoriteTattoo,
   HomeView,
   ServiceType,
-  TNotificationChannel,
 } from './client.constant';
 
 export interface IClient extends Document {
   image?: string;
-  location: typeof locationSchema;
+  location: { type: 'Point'; coordinates: [number, number] };
   radius: number;
   lookingFor: ServiceType[];
   country: string;

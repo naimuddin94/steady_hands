@@ -8,13 +8,20 @@ import {
   artistTypes,
   dateFormats,
 } from './client.constant';
-import { locationSchema } from '../Location/location.model';
+// import { locationSchema } from '../Location/location.model';
 
 const clientSchema = new Schema<IClient>(
   {
     location: {
-      type: locationSchema,
-      required: false,
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
     },
 
     radius: {
@@ -79,6 +86,8 @@ const clientSchema = new Schema<IClient>(
     versionKey: false,
   }
 );
+
+clientSchema.index({ location: '2dsphere' });
 
 const Client = model<IClient>('Client', clientSchema);
 
