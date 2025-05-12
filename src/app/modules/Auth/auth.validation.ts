@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { z } from 'zod';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { favoriteTattoos, serviceTypes } from '../Client/client.constant';
@@ -218,10 +219,26 @@ const profileSchema = z.object({
 
       location: z
         .object({
-          longitude: z.number().min(-180).max(180),
-          latitude: z.number().min(-90).max(90),
+          type: z.literal('Point').default('Point'), // Type must be 'Point'
+          coordinates: z
+            .array(z.number()) // Coordinates should be an array of numbers
+            .length(2) // There should be exactly two numbers (longitude, latitude)
+            .refine(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              ([longitude, latitude]) => longitude >= -180 && longitude <= 180,
+              {
+                message: 'Longitude must be between -180 and 180',
+              }
+            )
+            .refine(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              ([longitude, latitude]) => latitude >= -90 && latitude <= 90,
+              {
+                message: 'Latitude must be between -90 and 90',
+              }
+            ),
         })
-        .optional(),
+        .optional(), // The entire location object is optional
 
       radius: z.number().min(0).optional(),
       lookingFor: z.array(zodEnumFromObject(serviceTypes)).optional(),

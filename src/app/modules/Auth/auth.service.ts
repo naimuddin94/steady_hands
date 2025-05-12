@@ -315,14 +315,16 @@ const saveProfileIntoDB = async (
       );
 
       await session.commitTransaction();
-      session.endSession();
+      await session.endSession();
 
       return business;
     }
   } catch (error) {
     // ❌ Roll back transaction in case of any error
     await session.abortTransaction();
-    session.endSession();
+    await session.endSession();
+
+    console.log(error)
 
     // 🧼 Cleanup: Delete uploaded files to avoid storage bloat
     if (files && typeof files === 'object' && !Array.isArray(files)) {
