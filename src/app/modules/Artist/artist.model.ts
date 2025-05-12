@@ -1,7 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose';
 import { IArtist } from './artist.interface';
 import { expertiseTypes, ARTIST_TYPE } from './artist.constant';
-import { locationSchema } from '../Location/location.model';
 
 // 🔹 Subschema: Contact
 const contactSchema = new Schema(
@@ -58,8 +57,15 @@ const artistSchema = new Schema<IArtist>(
     },
 
     location: {
-      type: locationSchema,
-      required: true,
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
     },
 
     city: {
@@ -140,6 +146,8 @@ const artistSchema = new Schema<IArtist>(
     versionKey: false,
   }
 );
+
+artistSchema.index({ location: '2dsphere' });
 
 const Artist = model<IArtist>('Artist', artistSchema);
 

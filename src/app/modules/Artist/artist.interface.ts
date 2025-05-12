@@ -5,14 +5,13 @@ import {
   TContact,
   TServices,
 } from './artist.constant';
-import { locationSchema } from '../Location/location.model';
 
 export interface IArtist extends Document {
   auth: Types.ObjectId;
   type: TArtistType;
   expertise: ExpertiseType[];
   image?: string;
-  location: typeof locationSchema;
+  location: { type: 'Point'; coordinates: [number, number] };
   city: string;
   idCardFront: string;
   idCardBack: string;
@@ -27,5 +26,5 @@ export interface IArtist extends Document {
   flashes: Types.ObjectId[];
   portfolio: Types.ObjectId[];
   preferences?: Types.ObjectId;
-  timeOff: Date[],
+  timeOff: Date[];
 }
