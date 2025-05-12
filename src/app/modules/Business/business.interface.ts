@@ -1,5 +1,5 @@
+/* eslint-disable no-unused-vars */
 import { Document, Types } from 'mongoose';
-import { locationSchema } from '../Location/location.model';
 import { TContact } from '../Artist/artist.constant';
 import {
   TBusinessType,
@@ -16,7 +16,7 @@ export interface IBusiness extends Document {
   servicesOffered: TServiceOffered[];
 
   // Location & Contact
-  location: typeof locationSchema;
+  location: { type: 'Point'; coordinates: [number, number] };
   city: string;
   contact: TContact;
 
@@ -45,5 +45,5 @@ export interface IBusiness extends Document {
   events?: Types.ObjectId[];
   residentArtists?: Types.ObjectId[];
 
-  timeOff: Date[],
+  timeOff: Date[];
 }

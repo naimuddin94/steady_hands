@@ -3,7 +3,6 @@ import {
   BUSINESS_TYPE,
   SERVICES_OFFERED,
 } from './business.constants';
-import { locationSchema } from '../Location/location.model';
 import { IBusiness } from './business.interface';
 
 const timeRangeSchema = new Schema(
@@ -46,7 +45,17 @@ const businessSchema = new Schema<IBusiness>(
 
     // Contact & location
     city: { type: String, required: true },
-    location: { type: locationSchema, required: true },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
     contact: { type: contactSchema, required: true },
 
     // Operating hours
@@ -82,6 +91,8 @@ const businessSchema = new Schema<IBusiness>(
     versionKey: false,
   }
 );
+
+businessSchema.index({ location: '2dsphere' });
 
 const Business = mongoose.model<IBusiness>('Business', businessSchema);
 
