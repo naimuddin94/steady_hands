@@ -61,7 +61,7 @@ const updatePrivacySecuritySettings = asyncHandler(async (req, res) => {
 });
 
 const fetchDiscoverArtists = asyncHandler(async (req, res) => {
-  const result = await ClientService.fetchDiscoverArtistFromDB(
+  const {data, meta} = await ClientService.fetchDiscoverArtistFromDB(
     req.user,
     req.query
   );
@@ -71,8 +71,9 @@ const fetchDiscoverArtists = asyncHandler(async (req, res) => {
     .json(
       new AppResponse(
         status.OK,
-        result,
-        'Discover artists retrieved successfully'
+        data,
+        'Discover artists retrieved successfully',
+        meta
       )
     );
 });
