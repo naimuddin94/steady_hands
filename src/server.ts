@@ -68,11 +68,6 @@ async function bootstrap() {
     io.on(SOCKET_EVENTS.CONNECTION, (socket) => {
       console.log('A user connected', socket.id);
 
-      // Handle sending messages
-      socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (data) => {
-        console.log('From receive message: ', data);
-      });
-
       // Handle joining a room for group chat
       socket.on(SOCKET_EVENTS.JOIN_ROOM, (room: string) => {
         socket.join(room);
@@ -80,7 +75,7 @@ async function bootstrap() {
       });
 
       // Handle sending messages
-      socket.on(SOCKET_EVENTS.SEND_MESSAGE, (data) => {
+      socket.on(SOCKET_EVENTS.SEND_MESSAGE, (data: any) => {
         const { message, room, userId } = data;
         console.log(`Message from ${userId}: ${message}`);
         if (room) {
