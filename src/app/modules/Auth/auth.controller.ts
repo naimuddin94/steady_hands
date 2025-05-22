@@ -33,7 +33,7 @@ const saveAuthData = asyncHandler(async (req, res) => {
     .json(
       new AppResponse(
         status.CREATED,
-        { token: result.accessToken },
+        { accessToken: result.accessToken },
         'OTP verified successfully'
       )
     );
