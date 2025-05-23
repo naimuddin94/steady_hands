@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 
 import { Model, Types } from 'mongoose';
-import { TRole } from '../Auth/auth.constant';
 
 export enum MessageType {
   text = 'text',
@@ -15,7 +14,6 @@ export const MessageTypeValues = Object.values(MessageType);
 
 export type IMessage = {
   senderId: Types.ObjectId;
-  senderRole: TRole;
   receiverId: Types.ObjectId;
   message: string;
   messageType: MessageType;

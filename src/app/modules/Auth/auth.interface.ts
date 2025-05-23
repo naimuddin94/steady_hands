@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { Document, Model } from 'mongoose';
 import { TRole } from './auth.constant';
 
 export interface IAuth extends Document {
-  createdAt: any;
   email: string;
   fullName?: string;
   phoneNumber: string;
@@ -15,6 +15,8 @@ export interface IAuth extends Document {
   isProfile: boolean;
   isVerified: boolean;
   isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IAuthMethods {

@@ -14,10 +14,6 @@ export const MessageSchema: Schema<IMessage> = new Schema<IMessage>(
       ref: 'Auth',
       required: true,
     },
-    senderRole: {
-      type: String,
-      required: true,
-    },
     message: {
       type: String,
       required: true,

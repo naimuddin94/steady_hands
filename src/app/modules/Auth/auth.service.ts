@@ -325,7 +325,6 @@ const saveProfileIntoDB = async (
     await session.abortTransaction();
     await session.endSession();
 
-    console.log(error);
 
     // 🧼 Cleanup: Delete uploaded files to avoid storage bloat
     if (files && typeof files === 'object' && !Array.isArray(files)) {
