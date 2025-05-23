@@ -3,7 +3,6 @@ import status from 'http-status';
 import { AppError } from '../utils';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
-import { ROLE } from '../modules/Auth/auth.constant';
 import Auth from '../modules/Auth/auth.model';
 
 // import { NextFunction } from 'express';
@@ -28,15 +27,16 @@ export const socketAuth = async (socket: Socket, next: any) => {
 
     const user = await Auth.findById(verifiedUser._id).select('-password');
 
-    const admin = await Auth.findOne({ role: ROLE.SUPER_ADMIN });
-
     if (!user || user === null) {
       throw new AppError(status.NOT_FOUND, 'User not found');
     }
 
+    if (user?._id) {
+      socket.join(user?._id.toString());
+    }
+
     // Attach user to socket
     socket.data.user = user;
-    socket.data.admin = admin;
     next();
   } catch {
     next(new Error('Authentication error'));

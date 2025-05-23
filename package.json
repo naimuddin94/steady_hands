@@ -28,6 +28,7 @@
     "stripe": "^17.7.0",
     "twilio": "^5.5.1",
     "uuid": "^11.1.0",
+    "uuidv4": "^6.2.13",
     "zod": "^3.24.1"
   },
   "devDependencies": {
