@@ -7,6 +7,7 @@ import { BookingRoutes } from '../modules/Booking/booking.route';
 import { FolderRoutes } from '../modules/Folder/folder.route';
 import { AdminRoutes } from '../modules/Admin/admin.route';
 import { RequestRoute } from '../modules/Request/request.route';
+import { MessageRoutes } from '../modules/Message/message.route';
 
 const router = Router();
 
@@ -42,6 +43,10 @@ const moduleRoutes = [
   {
     path: '/requests',
     route: RequestRoute,
+  },
+  {
+    path: '/messages',
+    route: MessageRoutes,
   },
 ];
 

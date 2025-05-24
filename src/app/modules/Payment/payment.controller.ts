@@ -15,11 +15,9 @@ const createSubscription = asyncHandler(async (req, res) => {
 });
 
 const handlePaymentSuccess = asyncHandler(async (req, res) => {
-  const projectId = req.body.projectId;
   const { message } = await PaymentService.verifyPaymentSuccess(
     req.user,
-    req.query.session_id as string,
-    projectId
+    req.query.session_id as string
   );
 
   res.status(status.OK).json(new AppResponse(status.OK, null, message));
