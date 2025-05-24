@@ -62,7 +62,7 @@ app.use('/api/v1', routes);
 
 //Testing
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.send({ message: 'Express server is running :(' });
+  res.send({ message: 'Express server is running:(' });
 });
 
 //global error handler
