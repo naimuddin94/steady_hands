@@ -8,6 +8,7 @@ import { FolderRoutes } from '../modules/Folder/folder.route';
 import { AdminRoutes } from '../modules/Admin/admin.route';
 import { RequestRoute } from '../modules/Request/request.route';
 import { MessageRoutes } from '../modules/Message/message.route';
+import { PaymentRoutes } from '../modules/Payment/payment.route';
 
 const router = Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: '/messages',
     route: MessageRoutes,
+  },
+  {
+    path: '/payments',
+    route: PaymentRoutes,
   },
 ];
 

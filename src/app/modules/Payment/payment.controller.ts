@@ -23,23 +23,7 @@ const handlePaymentSuccess = asyncHandler(async (req, res) => {
   res.status(status.OK).json(new AppResponse(status.OK, null, message));
 });
 
-const cancelSubscription = asyncHandler(async (req, res) => {
-  const subscriptionId = req.body.subscriptionId;
-
-  const result = await PaymentService.cancelSubscriptionFromStripe(
-    req.user,
-    subscriptionId
-  );
-
-  res
-    .status(status.OK)
-    .json(
-      new AppResponse(status.OK, result, 'Subscription cancel successfully')
-    );
-});
-
 export const PaymentController = {
   createSubscription,
   handlePaymentSuccess,
-  cancelSubscription,
 };

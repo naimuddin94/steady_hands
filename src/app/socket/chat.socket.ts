@@ -14,14 +14,10 @@ const initSocketIo = (io: Server): void => {
 
     console.log(`User connected: ${userData?.email}`);
 
-    ////! join room listener
+    //! join room listener
     socket.on(SOCKET_EVENTS.JOIN_ROOM, ({ roomId }: { roomId: string }) => {
       socket.join(roomId);
     });
-
-    console.log('Rooms this socket is in:', socket.rooms);
-
-    console.log('All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
 
     //! message listener
     socket.on(

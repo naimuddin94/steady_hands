@@ -3,7 +3,6 @@ import Stripe from 'stripe';
 import config from '../../config';
 import { AppError } from '../../utils';
 import status from 'http-status';
-import Subscription from '../Subscription/subscription.model';
 import mongoose from 'mongoose';
 import { IAuth } from '../Auth/auth.interface';
 
@@ -115,55 +114,7 @@ const verifyPaymentSuccess = async (user: IAuth, sessionId: string) => {
   }
 };
 
-const cancelSubscriptionFromStripe = async (
-  user: IAuth,
-  subscriptionId: string
-) => {
-  if (!subscriptionId) {
-    throw new AppError(status.BAD_REQUEST, 'subscription ID is required');
-  }
-
-  // Start a Mongoose transaction
-  const mongoSession = await mongoose.startSession();
-  mongoSession.startTransaction();
-
-  try {
-    // Step 1: Cancel the subscription in Stripe
-    await stripe.subscriptions.cancel(subscriptionId);
-
-    // Step 2: Update the subscription status in the database
-    const subscription = await Subscription.findOneAndUpdate(
-      { user: user._id, subscriptionId: subscriptionId },
-      { status: 'cancel' },
-      { new: true, session: mongoSession }
-    );
-
-    if (!subscription) {
-      throw new AppError(
-        status.NOT_FOUND,
-        'Subscription not found in database.'
-      );
-    }
-
-    // Commit the transaction if everything succeeds
-    await mongoSession.commitTransaction();
-    mongoSession.endSession();
-
-    return { message: 'Subscription canceled successfully' };
-  } catch (error: any) {
-    // Rollback transaction if any error occurs
-    await mongoSession.abortTransaction();
-    mongoSession.endSession();
-
-    throw new AppError(
-      status.INTERNAL_SERVER_ERROR,
-      `Transaction failed: ${error.message}`
-    );
-  }
-};
-
 export const PaymentService = {
   createSubscriptionIntoDB,
   verifyPaymentSuccess,
-  cancelSubscriptionFromStripe,
 };
