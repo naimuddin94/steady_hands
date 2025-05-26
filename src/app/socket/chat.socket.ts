@@ -3,8 +3,8 @@
 import { Server, Socket } from 'socket.io';
 import { socketAuth } from '../middlewares';
 import { MessageData, SOCKET_EVENTS, SocketUser } from './socket.constant';
-
-import { MessageModel } from '../modules/Message/message.model';
+import { MessageService } from '../modules/Message/message.service';
+import Auth from '../modules/Auth/auth.model';
 
 const initSocketIo = (io: Server): void => {
   io.use(socketAuth);
@@ -18,6 +18,10 @@ const initSocketIo = (io: Server): void => {
     socket.on(SOCKET_EVENTS.JOIN_ROOM, ({ roomId }: { roomId: string }) => {
       socket.join(roomId);
     });
+
+    console.log('Rooms this socket is in:', socket.rooms);
+
+    console.log('All rooms:', Array.from(io.sockets.adapter.rooms.keys()));
 
     //! message listener
     socket.on(
@@ -34,14 +38,25 @@ const initSocketIo = (io: Server): void => {
         const payload: any = { message, messageType, receiverId };
 
         payload.roomId = roomId || generateRoomId(userData?._id, receiverId);
+        payload.senderId = userData._id;
 
-        const response = await MessageModel.create(payload);
+        const receiver = await Auth.findById(payload.receiverId);
 
-        socket.to(payload.roomId).emit(SOCKET_EVENTS.MESSAGE, response);
-        socket.emit(payload.receiverId, response);
-        socket
-          .to(payload.receiverId)
-          .emit(SOCKET_EVENTS.NOTIFICATION, response);
+        if (!receiver) {
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            statusCode: 404,
+            message: 'Receiver user not found',
+          });
+          return;
+        }
+
+        const response = await MessageService.createMessage(payload);
+
+        io.to(String(payload.roomId)).emit(SOCKET_EVENTS.MESSAGE, response);
+        io.to(String(payload.receiverId)).emit(
+          SOCKET_EVENTS.NOTIFICATION,
+          response
+        );
       }
     );
 
