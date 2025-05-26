@@ -21,29 +21,23 @@ const fetchMessagesByRoomId = async (roomId: string): Promise<IMessage[]> => {
 };
 
 const createMessage = async (payload: Partial<IMessage>): Promise<IMessage> => {
-  if (!payload.senderId || !payload.receiverId || !payload.message) {
-    throw new AppError(status.BAD_REQUEST, 'Missing required message fields');
+  if (!payload.senderId) {
+    throw new AppError(status.BAD_REQUEST, 'Sender id is required');
   }
 
-  const mongoSession = await mongoose.startSession();
-  mongoSession.startTransaction();
-
-  try {
-    const message = new MessageModel(payload);
-    const savedMessage = await message.save({ session: mongoSession });
-
-    await mongoSession.commitTransaction();
-    mongoSession.endSession();
-
-    return savedMessage;
-  } catch (error: any) {
-    await mongoSession.abortTransaction();
-    mongoSession.endSession();
-    throw new AppError(
-      status.INTERNAL_SERVER_ERROR,
-      `Failed to create message: ${error.message}`
-    );
+  if (!payload.receiverId) {
+    throw new AppError(status.BAD_REQUEST, 'Receiver id is required');
   }
+
+  if (!payload.message) {
+    throw new AppError(status.BAD_REQUEST, 'Message id is required');
+  }
+
+  if (!payload.roomId) {
+    throw new AppError(status.BAD_REQUEST, 'Room id is required');
+  }
+
+  return await MessageModel.create(payload);
 };
 
 const deleteMessage = async (messageId: string): Promise<IMessage | null> => {
@@ -80,7 +74,9 @@ const deleteMessage = async (messageId: string): Promise<IMessage | null> => {
   }
 };
 
-const markMessageAsRead = async (messageId: string): Promise<IMessage | null> => {
+const markMessageAsRead = async (
+  messageId: string
+): Promise<IMessage | null> => {
   if (!messageId) {
     throw new AppError(status.BAD_REQUEST, 'Message ID is required');
   }
@@ -105,7 +101,10 @@ const markMessageAsRead = async (messageId: string): Promise<IMessage | null> =>
   }
 };
 
-const pinMessage = async (messageId: string, pin: boolean): Promise<IMessage | null> => {
+const pinMessage = async (
+  messageId: string,
+  pin: boolean
+): Promise<IMessage | null> => {
   if (!messageId) {
     throw new AppError(status.BAD_REQUEST, 'Message ID is required');
   }

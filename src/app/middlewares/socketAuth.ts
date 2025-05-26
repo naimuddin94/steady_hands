@@ -25,7 +25,7 @@ export const socketAuth = async (socket: Socket, next: any) => {
       config.jwt_access_secret!
     ) as JwtPayload;
 
-    const user = await Auth.findById(verifiedUser._id).select('-password');
+    const user = await Auth.findById(verifiedUser.id).select('-password');
 
     if (!user || user === null) {
       throw new AppError(status.NOT_FOUND, 'User not found');

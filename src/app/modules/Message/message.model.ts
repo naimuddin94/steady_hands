@@ -26,7 +26,7 @@ export const MessageSchema: Schema<IMessage> = new Schema<IMessage>(
     },
     roomId: {
       type: String,
-      default: null,
+      required: true,
     },
     replyTo: {
       type: Schema.Types.ObjectId,
