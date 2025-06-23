@@ -320,11 +320,10 @@ const saveProfileIntoDB = async (
 
       return business;
     }
-  } catch (error) {
+  } catch (error: any) {
     // ❌ Roll back transaction in case of any error
     await session.abortTransaction();
     await session.endSession();
-
 
     // 🧼 Cleanup: Delete uploaded files to avoid storage bloat
     if (files && typeof files === 'object' && !Array.isArray(files)) {
@@ -353,7 +352,7 @@ const saveProfileIntoDB = async (
     // 🧾 Throw generic internal server error
     throw new AppError(
       status.INTERNAL_SERVER_ERROR,
-      'Failed to create profile. Please try again.'
+      error?.message || 'Failed to create profile. Please try again.'
     );
   }
 };
