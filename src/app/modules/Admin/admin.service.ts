@@ -3,6 +3,7 @@ import { AppError } from '../../utils';
 import Folder from '../Folder/folder.model';
 import fs from 'fs';
 import Artist from '../Artist/artist.model';
+import Business from '../Business/business.model';
 
 const getArtistFolders = async () => {
   return await Folder.find({ isPublished: false });
@@ -55,8 +56,23 @@ const verifiedArtistByAdminIntoDB = async (artistId: string) => {
   return result;
 };
 
+const verifiedBusinessByAdminIntoDB = async (businessId: string) => {
+  const result = await Business.findByIdAndUpdate(
+    businessId,
+    { isVerified: true },
+    { new: true }
+  );
+
+  if (!result) {
+    throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  return result;
+};
+
 export const AdminService = {
   getArtistFolders,
   changeStatusOnFolder,
   verifiedArtistByAdminIntoDB,
+  verifiedBusinessByAdminIntoDB,
 };

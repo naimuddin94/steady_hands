@@ -29,8 +29,18 @@ const verifiedArtistByAdmin = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Artist verified successfully'));
 });
 
+const verifiedBusinessByAdmin = asyncHandler(async (req, res) => {
+  const businessId = req.params.businessId;
+  const result = await AdminService.verifiedBusinessByAdminIntoDB(businessId);
+
+  res
+    .status(status.OK)
+    .json(new AppResponse(status.OK, result, 'Business verified successfully'));
+});
+
 export const AdminController = {
   getFolders,
   changeStatusOnFolder,
   verifiedArtistByAdmin,
+  verifiedBusinessByAdmin,
 };
