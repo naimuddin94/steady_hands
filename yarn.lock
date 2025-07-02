@@ -1621,6 +1621,11 @@ mongodb@~6.15.0:
     bson "^6.10.3"
     mongodb-connection-string-url "^3.0.0"
 
+mongoose-query-builders@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/mongoose-query-builders/-/mongoose-query-builders-1.2.2.tgz#30eaa8b06dbb9c3177fc68eba15c79989d1adb7d"
+  integrity sha512-+xAx0IO4N/8Bgvkpqw6dRB/34SrVW4bWnroE85Jfam/qCt9NL8W2sWgE9tkVwrT6tAh79WWiJXFH3IAqavi0JA==
+
 mongoose@^8.9.4:
   version "8.13.2"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-8.13.2.tgz#c59458a9167a32f7f6cced2c572d320dafa703c9"

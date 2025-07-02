@@ -120,7 +120,7 @@ const artistSchema = new Schema<IArtist>(
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     flashes: [
       {

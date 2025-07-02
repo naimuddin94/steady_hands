@@ -38,9 +38,57 @@ const verifiedBusinessByAdmin = asyncHandler(async (req, res) => {
     .json(new AppResponse(status.OK, result, 'Business verified successfully'));
 });
 
+const fetchAllArtists = asyncHandler(async (req, res) => {
+  const result = await AdminService.fetchAllArtists(req.query);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result.data,
+        'Artists retrieved successFully',
+        result.meta
+      )
+    );
+});
+
+const fetchAllBusiness = asyncHandler(async (req, res) => {
+  const result = await AdminService.fetchAllBusiness(req.query);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result.data,
+        'Business retrieved successFully',
+        result.meta
+      )
+    );
+});
+
+const fetchAllClient = asyncHandler(async (req, res) => {
+  const result = await AdminService.fetchAllClient(req.query);
+
+  res
+    .status(status.OK)
+    .json(
+      new AppResponse(
+        status.OK,
+        result.data,
+        'Clients retrieved successFully',
+        result.meta
+      )
+    );
+});
+
 export const AdminController = {
   getFolders,
   changeStatusOnFolder,
   verifiedArtistByAdmin,
   verifiedBusinessByAdmin,
+  fetchAllArtists,
+  fetchAllBusiness,
+  fetchAllClient,
 };

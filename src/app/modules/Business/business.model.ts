@@ -1,8 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import {
-  BUSINESS_TYPE,
-  SERVICES_OFFERED,
-} from './business.constants';
+import { BUSINESS_TYPE, SERVICES_OFFERED } from './business.constants';
 import { IBusiness } from './business.interface';
 
 const timeRangeSchema = new Schema(
@@ -77,7 +74,7 @@ const businessSchema = new Schema<IBusiness>(
     // Status flags
     isVerified: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
 
     // Relationships
     preferences: { type: Schema.Types.ObjectId, ref: 'BusinessPreferences' },

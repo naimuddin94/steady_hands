@@ -456,8 +456,6 @@ const changePasswordIntoDB = async (
     '+password'
   );
 
-  console.log(user);
-
   if (!user) {
     throw new AppError(status.NOT_FOUND, 'User not exists');
   }
@@ -519,8 +517,6 @@ const verifyOtpForForgetPassword = async (payload: {
   if (verificationCode !== payload.otp || !verificationExpiry) {
     throw new AppError(status.BAD_REQUEST, 'Invalid OTP');
   }
-
-  console.log({ verificationExpiry });
 
   // Check if OTP has expired
   if (Date.now() > new Date(verificationExpiry).getTime()) {
@@ -615,6 +611,8 @@ const fetchProfileFromDB = async (user: IAuth) => {
     }).select('-businessId -updatedAt -createdAt -__v');
 
     return { ...business?.toObject(), preference };
+  } else if (user?.role === ROLE.ADMIN || user?.role === ROLE.SUPER_ADMIN) {
+    return user;
   }
 };
 
