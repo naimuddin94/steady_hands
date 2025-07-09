@@ -583,6 +583,12 @@ const fetchProfileFromDB = async (user: IAuth) => {
         path: 'auth',
         select: 'fullName image email phoneNumber isProfile',
       },
+      {
+        path: 'flashes.folder',
+      },
+      {
+        path: 'portfolio.folder',
+      },
     ]);
 
     const preference = await ArtistPreferences.findOne({

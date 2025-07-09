@@ -37,6 +37,18 @@ const changeStatusOnFolder = async (folderId: string, permission: boolean) => {
       return await Folder.findByIdAndUpdate(folderId, {
         isPublished: true,
       });
+    } else if (folder.for === 'flash') {
+      await Artist.findByIdAndUpdate(artist?._id, {
+        $addToSet: {
+          flashes: {
+            folder: folder._id,
+            position: artist?.flashes?.length + 1,
+          },
+        },
+      });
+      return await Folder.findByIdAndUpdate(folderId, {
+        isPublished: true,
+      });
     }
   } else {
     const deletedFolder = await Folder.findByIdAndDelete(folderId);

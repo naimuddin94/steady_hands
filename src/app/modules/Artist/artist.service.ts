@@ -173,13 +173,19 @@ const addPortfolioImages = async (
 ) => {
   const artist = await Artist.findOne({
     auth: user._id,
-    isActive: true,
     isDeleted: false,
-    isVerified: true,
   });
 
   if (!artist) {
     throw new AppError(status.NOT_FOUND, 'Artist not found');
+  }
+
+  if (!artist.isVerified) {
+    throw new AppError(status.BAD_REQUEST, 'Artist not verified');
+  }
+
+  if (!artist.isActive) {
+    throw new AppError(status.BAD_REQUEST, 'Artist not activated by admin yet');
   }
 
   if (!files || !files?.length) {

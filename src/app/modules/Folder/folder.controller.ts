@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import status from 'http-status';
 import { AppResponse, asyncHandler } from '../../utils';
 import { FolderService } from './folder.service';

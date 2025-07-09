@@ -7,6 +7,7 @@ import {
   dateFormats,
   notificationChannel,
 } from './client.constant';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 
 const preferencesSchema = z.object({
   body: z.object({
@@ -89,6 +90,18 @@ const profileInfoSchema = z.object({
         .nonempty('Name is required')
         .min(3, 'Name must be at least 3 characters long')
         .max(100, 'Name cannot exceed 100 characters')
+        .optional(),
+      phoneNumber: z
+        .string()
+        .refine(
+          (val) => {
+            const parsed = parsePhoneNumberFromString(val);
+            return parsed?.isValid();
+          },
+          {
+            message: 'Phone number must be a valid international format',
+          }
+        )
         .optional(),
       country: z.string().nonempty('Country is required').optional(),
     })
